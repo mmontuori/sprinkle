@@ -1,3 +1,13 @@
+#!/usr/bin/env python
+"""
+rclone wrapper module
+
+__author__ = "Michael Montuori [michael.montuori@gmail.com]"
+__copyright__ = "Copyright 2017 Michael Montuori. All rights reserved."
+__credits__ = []
+__license__ = "closed"
+__version__ = "0.1"
+"""
 
 import logging
 import subprocess
@@ -75,4 +85,113 @@ class RClone:
         lsjson = result['out'].splitlines()
         logging.debug('returning ' + str(lsjson))
         return lsjson
+
+    def get_about(self, remote):
+        logging.debug('running about for ' + remote)
+        command_with_args = [self._rclone_exe, "about", "--json", "--config", self._config_file, remote]
+        result = self._execute(command_with_args)
+        logging.debug('result: ' + str(result))
+        if result['error'] is not '':
+            logging.error('error getting remotes objects')
+            raise Exception('error getting remote object. ' + result['error'])
+        aboutjson = result['out'].splitlines()
+        logging.debug('returning ' + str(aboutjson))
+        return aboutjson
+
+    def mkdir(self, remote, directory):
+        logging.debug('running mkdir for ' + remote + ":" + directory)
+        command_with_args = [self._rclone_exe, "mkdir", "--config", self._config_file, remote + directory]
+        result = self._execute(command_with_args)
+        logging.debug('result: ' + str(result))
+        if result['error'] is not '':
+            logging.error('error getting remotes objects')
+            raise Exception('error getting remote object. ' + result['error'])
+        out = result['out'].splitlines()
+        logging.debug('returning ' + str(out))
+        return out
+
+    def rmdir(self, remote, directory):
+        logging.debug('running rmdir for ' + remote + ":" + directory)
+        command_with_args = [self._rclone_exe, "rmdir", "--config", self._config_file, remote + directory]
+        result = self._execute(command_with_args)
+        logging.debug('result: ' + str(result))
+        if result['error'] is not '':
+            logging.error('error getting remotes objects')
+            raise Exception('error getting remote object. ' + result['error'])
+        out = result['out'].splitlines()
+        logging.debug('returning ' + str(out))
+        return out
+
+    def get_version(self):
+        logging.debug('running version')
+        command_with_args = [self._rclone_exe, "version"]
+        result = self._execute(command_with_args)
+        logging.debug('result: ' + str(result))
+        if result['error'] is not '':
+            logging.error('error getting remotes objects')
+            raise Exception('error getting remote object. ' + result['error'])
+        out = result['out'].splitlines()
+        logging.debug('returning ' + str(out))
+        return out
+
+    def touch(self, remote, file):
+        logging.debug('running touch for ' + remote + ":" + file)
+        command_with_args = [self._rclone_exe, "touch", "--config", self._config_file, remote + file]
+        result = self._execute(command_with_args)
+        logging.debug('result: ' + str(result))
+        if result['error'] is not '':
+            logging.error('error getting remotes objects')
+            raise Exception('error getting remote object. ' + result['error'])
+        out = result['out'].splitlines()
+        logging.debug('returning ' + str(out))
+        return out
+
+    def delete_file(self, remote, file):
+        logging.debug('running deleteFile for ' + remote + ":" + file)
+        command_with_args = [self._rclone_exe, "deletefile", "--config", self._config_file, remote + file]
+        result = self._execute(command_with_args)
+        logging.debug('result: ' + str(result))
+        if result['error'] is not '':
+            logging.error('error getting remotes objects')
+            raise Exception('error getting remote object. ' + result['error'])
+        out = result['out'].splitlines()
+        logging.debug('returning ' + str(out))
+        return out
+
+    def delete(self, remote, file):
+        logging.debug('running delete for ' + remote + ":" + file)
+        command_with_args = [self._rclone_exe, "delete", "--config", self._config_file, remote + file]
+        result = self._execute(command_with_args)
+        logging.debug('result: ' + str(result))
+        if result['error'] is not '':
+            logging.error('error getting remotes objects')
+            raise Exception('error getting remote object. ' + result['error'])
+        out = result['out'].splitlines()
+        logging.debug('returning ' + str(out))
+        return out
+
+    def copy(self, src, dst):
+        logging.debug('running copy from ' + src + " to " + dst)
+        command_with_args = [self._rclone_exe, "copy", "--config", self._config_file, src, dst]
+        result = self._execute(command_with_args)
+        logging.debug('result: ' + str(result))
+        if result['error'] is not '':
+            logging.error('error getting remotes objects')
+            raise Exception('error getting remote object. ' + result['error'])
+        out = result['out'].splitlines()
+        logging.debug('returning ' + str(out))
+        return None
+
+    def move(self, src, dst):
+        logging.debug('running move from ' + src + " to " + dst)
+        command_with_args = [self._rclone_exe, "move", "--config", self._config_file, src, dst]
+        result = self._execute(command_with_args)
+        logging.debug('result: ' + str(result))
+        if result['error'] is not '':
+            logging.error('error getting remotes objects')
+            raise Exception('error getting remote object. ' + result['error'])
+        out = result['out'].splitlines()
+        logging.debug('returning ' + str(out))
+        return None
+
 
