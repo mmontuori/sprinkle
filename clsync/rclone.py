@@ -12,6 +12,7 @@ __version__ = "0.1"
 import logging
 import subprocess
 import os.path
+import json
 
 class RClone:
 
@@ -180,7 +181,7 @@ class RClone:
             raise Exception('error getting remote object. ' + result['error'])
         out = result['out'].splitlines()
         logging.debug('returning ' + str(out))
-        return None
+        return out
 
     def move(self, src, dst):
         logging.debug('running move from ' + src + " to " + dst)
@@ -192,6 +193,33 @@ class RClone:
             raise Exception('error getting remote object. ' + result['error'])
         out = result['out'].splitlines()
         logging.debug('returning ' + str(out))
-        return None
+        return out
+
+    def get_free(self, remote):
+        logging.debug('running about for ' + remote)
+        command_with_args = [self._rclone_exe, "about", "--json", "--config", self._config_file, remote]
+        result = self._execute(command_with_args)
+        logging.debug('result: ' + str(result))
+        if result['error'] is not '':
+            logging.error('error getting remotes objects')
+            raise Exception('error getting remote object. ' + result['error'])
+        aboutjson = result['out']
+        json_obj = json.loads(aboutjson)
+        logging.debug('free ' + str(json_obj['free']))
+        return json_obj['free']
+
+    def get_size(self, remote):
+        logging.debug('running about for ' + remote)
+        command_with_args = [self._rclone_exe, "about", "--json", "--config", self._config_file, remote]
+        result = self._execute(command_with_args)
+        logging.debug('result: ' + str(result))
+        if result['error'] is not '':
+            logging.error('error getting remotes objects')
+            raise Exception('error getting remote object. ' + result['error'])
+        aboutjson = result['out']
+        json_obj = json.loads(aboutjson)
+        logging.debug('total ' + str(json_obj['total']))
+        return json_obj['total']
+
 
 
