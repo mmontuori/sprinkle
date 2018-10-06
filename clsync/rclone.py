@@ -79,12 +79,12 @@ class RClone:
         logging.debug('running lsjson for ' + remote + ":" + directory)
         command_with_args = [self._rclone_exe, "lsjson", "--config", self._config_file, remote+directory]
         result = self._execute(command_with_args)
-        logging.debug('result: ' + str(result))
+        #logging.debug('result: ' + str(result))
         if result['error'] is not '':
             logging.error('error getting remotes objects')
             raise Exception('error getting remote object. ' + result['error'])
-        lsjson = result['out'].splitlines()
-        logging.debug('returning ' + str(lsjson))
+        lsjson = result['out']
+        #logging.debug('returning ' + str(lsjson))
         return lsjson
 
     def get_about(self, remote):

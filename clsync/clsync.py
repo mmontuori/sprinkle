@@ -13,6 +13,8 @@ import logging
 import os.path
 from mmontuori import config
 from clsync import rclone
+import json
+from clsync import common
 
 class ClSync:
 
@@ -40,8 +42,11 @@ class ClSync:
 
     def lsjson(self, file):
         logging.debug('lsjson of file: ' + file)
+        json_ret = ''
         for remote in self.get_remotes():
             logging.debug('getting lsjson from ' + remote + file)
-            self._rclone.lsjson(remote, file)
-
+            json_out = self._rclone.lsjson(remote, file)
+            json_ret = json_ret + '||' + json_out
+            #logging.debug('json_ret: ' + json_ret)
+        return common.combine_jsons(json_ret)
 
