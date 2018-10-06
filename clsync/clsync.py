@@ -10,10 +10,8 @@ __version__ = "0.1"
 """
 
 import logging
-import os.path
 from mmontuori import config
 from clsync import rclone
-import json
 from clsync import common
 
 class ClSync:
@@ -23,7 +21,7 @@ class ClSync:
         if config_file == None:
             logging.error("configuration file " + str(config_file) + " is None. Cannot continue!")
             raise Exception("None value for configuration file")
-        if not os.path.isfile(config_file):
+        if not common.is_file(config_file):
             logging.error("configuration file " + str(config_file) + " not found. Cannot continue!")
             raise Exception("Configuration file not found")
         conf = config.Config(config_file)
@@ -90,4 +88,7 @@ class ClSync:
                     highest_size = size
                     best_remote = remote
         return best_remote
+
+    def sync(self, path):
+        logging.debug('synchronize path ' + path)
 
