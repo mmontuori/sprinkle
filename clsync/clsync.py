@@ -50,3 +50,44 @@ class ClSync:
             #logging.debug('json_ret: ' + json_ret)
         return common.combine_jsons(json_ret)
 
+    def get_size(self):
+        logging.debug('getting total size')
+        total_size = 0
+        for remote in self.get_remotes():
+            size = self._rclone.get_size(remote)
+            logging.debug('size of ' + remote + ' is ' + str(size))
+            total_size += size
+        return total_size
+
+    def get_free(self):
+        logging.debug('getting total free size')
+        total_size = 0
+        for remote in self.get_remotes():
+            size = self._rclone.get_free(remote)
+            logging.debug('free of ' + remote + ' is ' + str(size))
+            total_size += size
+        return total_size
+
+    def get_max_file_size(self):
+        logging.debug('getting total maximum file size')
+        total_size = 0
+        for remote in self.get_remotes():
+            size = self._rclone.get_free(remote)
+            logging.debug('free of ' + remote + ' is ' + str(size))
+            if size > total_size:
+                total_size = size
+        return total_size
+
+    def get_best_remote(self, requested_size=1):
+        logging.debug('selecting best remote with the most available space to store size: ' + str(requested_size))
+        best_remote = None
+        highest_size = 0
+        for remote in self.get_remotes():
+            size = self._rclone.get_free(remote)
+            logging.debug('free of ' + remote + ' is ' + str(size))
+            if size > highest_size:
+                if requested_size <= size:
+                    highest_size = size
+                    best_remote = remote
+        return best_remote
+

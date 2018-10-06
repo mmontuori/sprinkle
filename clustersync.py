@@ -38,8 +38,9 @@ logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S
 
 clsync = clsync.ClSync('clustersync.conf')
 
-lsout = clsync.lsjson("/")
+#lsout = clsync.lsjson("/")
+best_remote = clsync.get_best_remote(161056620)
 
 time.sleep(1)
 
-print('return value: ' + lsout)
+print('return value: ' + str(best_remote))
