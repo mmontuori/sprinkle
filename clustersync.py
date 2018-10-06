@@ -36,3 +36,7 @@ logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S
 #version = rclone.get_version()
 
 clsync = clsync.ClSync('clustersync.conf')
+for remote in clsync.get_remotes():
+    logging.debug('remote: ' + remote)
+
+clsync.lsjson("michaeldir")

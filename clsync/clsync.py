@@ -12,6 +12,7 @@ __version__ = "0.1"
 import logging
 import os.path
 from mmontuori import config
+from clsync import rclone
 
 class ClSync:
 
@@ -23,3 +24,24 @@ class ClSync:
         if not os.path.isfile(config_file):
             logging.error("configuration file " + str(config_file) + " not found. Cannot continue!")
             raise Exception("Configuration file not found")
+        conf = config.Config(config_file)
+        self._config = conf.get_config()
+        self._rclone = rclone.RClone(self._config['rclone_config'], self._config['rclone_exe'])
+
+    def get_remotes(self):
+        logging.debug('getting rclone remotes')
+        return self._rclone.get_remotes()
+
+    def mkdir(self, directory):
+        logging.debug('makind directory ' + directory)
+        for remote in self.get_remotes():
+            logging.debug('creating directory ' + remote + directory)
+            self._rclone.mkdir(remote, directory)
+
+    def lsjson(self, file):
+        logging.debug('lsjson of file: ' + file)
+        for remote in self.get_remotes():
+            logging.debug('getting lsjson from ' + remote + file)
+            self._rclone.lsjson(remote, file)
+
+
