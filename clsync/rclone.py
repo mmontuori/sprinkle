@@ -186,5 +186,16 @@ class RClone:
         logging.debug('total ' + str(json_obj['total']))
         return json_obj['total']
 
+    def sync(self, src, dst):
+        logging.debug('running sync from ' + src + " to " + dst)
+        command_with_args = [self._rclone_exe, "sync", "--config", self._config_file, src, dst]
+        result = common.execute(command_with_args)
+        logging.debug('result: ' + str(result))
+        if result['error'] is not '':
+            logging.error('error getting remotes objects')
+            raise Exception('error getting remote object. ' + result['error'])
+        out = result['out'].splitlines()
+        logging.debug('returning ' + str(out))
+        return out
 
 

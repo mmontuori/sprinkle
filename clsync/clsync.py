@@ -89,6 +89,27 @@ class ClSync:
                     best_remote = remote
         return best_remote
 
+    def rmdir(self, directory):
+        logging.debug('removing directory ' + directory)
+
+    def get_version(self):
+        logging.debug('getting version')
+
+    def touch(self, file):
+        logging.debug('touching file ' + file)
+
+    def delete_file(self, file):
+        logging.debug('deleting file ' + file)
+
+    def delete(self, path):
+        logging.debug('deleting path ' + path)
+
+    def copy(self, src, dst):
+        logging.debug('copy ' + src + ' to ' + dst)
+
+    def move(self, src, dst):
+        logging.debug('move ' + src + ' to ' + dst)
+
     def sync(self, path):
         logging.debug('synchronize path ' + path)
 
