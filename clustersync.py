@@ -9,33 +9,94 @@ __license__ = "closed"
 __version__ = "0.1"
 """
 
-from clsync import rclone
 from clsync import clsync
+from mmontuori import config
 import logging
-import time
+import getopt
+import sys
 
-logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.DEBUG)
 
-#rclone = rclone.RClone("c:/Users/micha/.config/rclone/rclone.conf", "c:/utilities/rclone/rclone.exe")
+def usage():
+    print("usage: clustersync.py [-h] {-c|--conf <config file>} {command=None} {arg...arg}")
+    print("       -h = help")
+    print("       -c = configuration file")
+    print("commands:")
+    print("       ls = list files")
 
-#remotes = rclone.get_remotes()
 
-#logging.debug('remotes: ' + str(remotes))
+def usage_ls():
+    print("usage: clustersync.py {-c|--conf <config file>} ls {pattern}")
+    print("*** TO BE FINISHED ***")
 
-#for remote in remotes:
-    #logging.debug('remote: ' + remote)
-    #json = rclone.get_about(remote)
-    #json = rclone.get_size(remote)
-    #json = rclone.get_free(remote)
-    #out = rclone.mkdir(remote, "/test")
-    #out = rclone.rmdir(remote, "/test")
-    #out = rclone.touch(remote, "/test.touch")
-    #out = rclone.delete_file(remote, "/test.touch")
-    #out = rclone.copy('c:/temp/nstest.blend', remote + "/nstest.blend")
-    #out = rclone.move('c:/temp/nstest.blend', remote + "/nstest.blend")
 
-#version = rclone.get_version()
+def read_args(argv):
+    global __configfile
+    global __dirtosync
+    global __args
 
-clsync = clsync.ClSync('clustersync.conf')
+    try:
+        opts, args = getopt.getopt(argv, "hc:", ["help", "conf="])
+    except getopt.GetoptError:
+        usage()
+        sys.exit(2)
 
-clsync.sync("/dirtosync")
+    for opt, arg in opts:
+        if opt in ('-h', '--help'):
+            usage()
+            sys.exit()
+        elif opt in ("-c", "--configfile"):
+            __configfile = arg
+
+    if len(args) < 1:
+        usage()
+        sys.exit()
+
+    __args = args
+
+    if __configfile == None or __configfile == '':
+        usage()
+        sys.exit(2)
+
+
+def read_config(config_file):
+    global __config
+    conf = config.Config(config_file)
+    __config = conf.get_config()
+
+
+def init_logging(debug):
+    if debug.lower() == "true":
+        logging.getLogger().setLevel(logging.DEBUG)
+        logging.info('debug mode initialized')
+    else:
+        logging.getLogger().setLevel(logging.INFO)
+        logging.info('info mode initialized')
+
+
+def main(argv):
+    logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
+    read_args(argv)
+    read_config(__configfile)
+    init_logging(__config['debug'])
+    logging.debug('config: ' + str(__config))
+
+    cl_sync = clsync.ClSync(__config)
+
+    if __args[0] == 'ls':
+        logging.debug('command ls')
+        if len(__args) == 1:
+            logging.error('invalid ls command')
+            usage_ls()
+            sys.exit(-1)
+        cl_sync.lsjson(__args[1])
+    else:
+        logging.error('invalid command')
+        usage()
+        sys.exit(-1)
+
+    cl_sync.sync("/dirtosync")
+
+
+if __name__ == "__main__":
+    # execute only if run as a script
+    main(sys.argv[1:])

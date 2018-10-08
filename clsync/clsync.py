@@ -10,22 +10,17 @@ __version__ = "0.1"
 """
 
 import logging
-from mmontuori import config
 from clsync import rclone
 from clsync import common
 
 class ClSync:
 
-    def __init__(self, config_file):
+    def __init__(self, config):
         logging.debug('constructing ClSync')
-        if config_file == None:
-            logging.error("configuration file " + str(config_file) + " is None. Cannot continue!")
-            raise Exception("None value for configuration file")
-        if not common.is_file(config_file):
-            logging.error("configuration file " + str(config_file) + " not found. Cannot continue!")
-            raise Exception("Configuration file not found")
-        conf = config.Config(config_file)
-        self._config = conf.get_config()
+        if config is None:
+            logging.error("configuration is None. Cannot continue!")
+            raise Exception("None value for configuration")
+        self._config = config
         self._rclone = rclone.RClone(self._config['rclone_config'], self._config['rclone_exe'])
 
     def get_remotes(self):

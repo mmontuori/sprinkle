@@ -22,7 +22,7 @@ def is_file(file):
     else:
         return True
 
-def execute(self, command_with_args):
+def execute(command_with_args):
     logging.debug("Invoking : %s", " ".join(command_with_args))
     try:
         with subprocess.Popen(
