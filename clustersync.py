@@ -85,8 +85,8 @@ def ls():
         logging.error('invalid ls command')
         usage_ls()
         sys.exit(-1)
-    files = cl_sync.lsjson(__args[1])
-    logging.debug('files: ' + str(files))
+    files = cl_sync.ls(__args[1])
+    #logging.debug('files: ' + str(files))
     for tmp_file in files:
         if tmp_file.is_dir is True:
             first_chars = '-d-'

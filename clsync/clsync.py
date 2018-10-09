@@ -42,7 +42,7 @@ class ClSync:
             logging.debug('creating directory ' + remote + directory)
             self._rclone.mkdir(remote, directory)
 
-    def lsjson(self, file):
+    def ls(self, file):
         logging.debug('lsjson of file: ' + file)
         json_ret = ''
         files = []
@@ -114,7 +114,7 @@ class ClSync:
                 full_path = os.path.join(root, name)
                 # logging.debug('adding ' + full_path + ' to list')
                 tmp_clfile = clfile.ClFile()
-                tmp_clfile.is_dir = "true"
+                tmp_clfile.is_dir = True
                 tmp_clfile.path = full_path
                 tmp_clfile.name = name
                 tmp_clfile.size = "-1"
@@ -124,13 +124,13 @@ class ClSync:
                 full_path = os.path.join(root, name)
                 # logging.debug('adding ' + full_path + ' to list')
                 tmp_clfile = clfile.ClFile()
-                tmp_clfile.is_dir = "true"
+                tmp_clfile.is_dir = False
                 tmp_clfile.path = full_path
                 tmp_clfile.name = name
                 tmp_clfile.size = os.stat(full_path).st_size
                 tmp_clfile.mod_time = os.stat(full_path).st_mtime
                 clfiles.append(tmp_clfile)
-        logging.debug('size of clfiles: ' + str(len(clfiles)))
+        logging.debug('retrieved ' + str(len(clfiles)) + ' files')
         return clfiles
 
     def backup(self, local_dir):
@@ -138,7 +138,7 @@ class ClSync:
         if not common.is_dir(local_dir):
             logging.error("local directory " + local_dir + " not found. Cannot continue!")
             raise Exception("Local directory " + local_dir + " not found")
-        clfiles = self.index_local_dir(local_dir)
+        local_clfiles = self.index_local_dir(local_dir)
         # index cloud directory
         # compare
         # insert new files
