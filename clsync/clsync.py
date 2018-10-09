@@ -14,6 +14,7 @@ from clsync import rclone
 from clsync import common
 from clsync import clfile
 import json
+import os
 
 class ClSync:
 
@@ -22,6 +23,12 @@ class ClSync:
         if config is None:
             logging.error("configuration is None. Cannot continue!")
             raise Exception("None value for configuration")
+        if config['rclone_workdir'] == None:
+            logging.error("working directory is None. Cannot continue!")
+            raise Exception("None value for working directory")
+        if not common.is_dir(config['rclone_workdir']):
+            logging.error("working directory " + str(config['rclone_workdir']) + " not found. Cannot continue!")
+            raise Exception("Working directory " + config['rclone_workdir'] + " not found")
         self._config = config
         self._rclone = rclone.RClone(self._config['rclone_config'], self._config['rclone_exe'])
 
@@ -99,6 +106,44 @@ class ClSync:
                     highest_size = size
                     best_remote = remote
         return best_remote
+
+    def index_local_dir(self, local_dir):
+        clfiles = []
+        for root, dirs, files in os.walk(local_dir):
+            for name in dirs:
+                full_path = os.path.join(root, name)
+                # logging.debug('adding ' + full_path + ' to list')
+                tmp_clfile = clfile.ClFile()
+                tmp_clfile.is_dir = "true"
+                tmp_clfile.path = full_path
+                tmp_clfile.name = name
+                tmp_clfile.size = "-1"
+                tmp_clfile.mod_time = os.stat(full_path).st_mtime
+                clfiles.append(tmp_clfile)
+            for name in files:
+                full_path = os.path.join(root, name)
+                # logging.debug('adding ' + full_path + ' to list')
+                tmp_clfile = clfile.ClFile()
+                tmp_clfile.is_dir = "true"
+                tmp_clfile.path = full_path
+                tmp_clfile.name = name
+                tmp_clfile.size = os.stat(full_path).st_size
+                tmp_clfile.mod_time = os.stat(full_path).st_mtime
+                clfiles.append(tmp_clfile)
+        logging.debug('size of clfiles: ' + str(len(clfiles)))
+        return clfiles
+
+    def backup(self, local_dir):
+        logging.debug('backing up directory ' + local_dir)
+        if not common.is_dir(local_dir):
+            logging.error("local directory " + local_dir + " not found. Cannot continue!")
+            raise Exception("Local directory " + local_dir + " not found")
+        clfiles = self.index_local_dir(local_dir)
+        # index cloud directory
+        # compare
+        # insert new files
+        # update existing files
+        # delete non existing cloud files
 
     def rmdir(self, directory):
         logging.debug('removing directory ' + directory)

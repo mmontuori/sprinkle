@@ -22,6 +22,13 @@ def is_file(file):
     else:
         return True
 
+def is_dir(dir):
+    if not os.path.isdir(dir):
+        return False
+    else:
+        return True
+
+
 def execute(command_with_args):
     logging.debug("Invoking : %s", " ".join(command_with_args))
     try:

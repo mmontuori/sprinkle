@@ -22,10 +22,10 @@ class RClone:
             raise Exception("None value for configuration file")
         if not common.is_file(config_file):
             logging.error("configuration file " + str(config_file) + " not found. Cannot continue!")
-            raise Exception("Configuration file not found")
+            raise Exception("Configuration file " + str(config_file) + " not found")
         if rclone_exe is not "rclone" and not common.is_file(rclone_exe):
             logging.error("rclone executable " + str(rclone_exe) + " not found. Cannot continue!")
-            raise Exception("rclone executable not found")
+            raise Exception("rclone executable " + str(rclone_exe) + " not found")
         self._config_file = config_file
         self._rclone_exe = rclone_exe
 

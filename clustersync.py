@@ -23,10 +23,16 @@ def usage():
     print("       -c = configuration file")
     print("commands:")
     print("       ls = list files")
+    print("   backup = backup files to clustered drives")
 
 
 def usage_ls():
     print("usage: clustersync.py {-c|--conf <config file>} ls {pattern}")
+    print("*** TO BE FINISHED ***")
+
+
+def usage_backup():
+    print("usage: clustersync.py {-c|--conf <config file>} backup {local dir}")
     print("*** TO BE FINISHED ***")
 
 
@@ -72,6 +78,39 @@ def init_logging(debug):
         logging.getLogger().setLevel(logging.INFO)
 
 
+def ls():
+    cl_sync = clsync.ClSync(__config)
+    common.print_line('file list:')
+    if len(__args) == 1:
+        logging.error('invalid ls command')
+        usage_ls()
+        sys.exit(-1)
+    files = cl_sync.lsjson(__args[1])
+    logging.debug('files: ' + str(files))
+    for tmp_file in files:
+        if tmp_file.is_dir is True:
+            first_chars = '-d-'
+        else:
+            first_chars = '---'
+        common.print_line(first_chars + " " +
+                          tmp_file.path.ljust(20) + " " +
+                          str(tmp_file.size).rjust(9) + " " +
+                          tmp_file.mod_time + " " +
+                          tmp_file.remote
+                          )
+
+
+def backup():
+    cl_sync = clsync.ClSync(__config)
+    if len(__args) == 1:
+        logging.error('invalid backup command')
+        usage_backup()
+        sys.exit(-1)
+    local_dir = __args[1]
+    common.print_line('backing up ' + local_dir + '...')
+    cl_sync.backup(local_dir)
+
+
 def main(argv):
     logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
     read_args(argv)
@@ -79,26 +118,12 @@ def main(argv):
     init_logging(__config['debug'])
     logging.debug('config: ' + str(__config))
 
-    cl_sync = clsync.ClSync(__config)
-
     common.print_line('ClusterSync Utility')
 
     if __args[0] == 'ls':
-        common.print_line('file list:')
-        if len(__args) == 1:
-            logging.error('invalid ls command')
-            usage_ls()
-            sys.exit(-1)
-        files = cl_sync.lsjson(__args[1])
-        logging.debug('files: ' + str(files))
-        for tmp_file in files:
-            common.print_line(tmp_file.name + ", " +
-                              str(tmp_file.is_dir) + ", " +
-                              tmp_file.path + ", " +
-                              tmp_file.mod_time + ", " +
-                              str(tmp_file.size) + ", " +
-                              tmp_file.remote
-                              )
+        ls()
+    elif __args[0] == 'backup':
+        backup()
     else:
         logging.error('invalid command')
         usage()
