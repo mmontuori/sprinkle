@@ -12,6 +12,8 @@ __version__ = "0.1"
 import logging
 from clsync import rclone
 from clsync import common
+from clsync import clfile
+import json
 
 class ClSync:
 
@@ -36,12 +38,26 @@ class ClSync:
     def lsjson(self, file):
         logging.debug('lsjson of file: ' + file)
         json_ret = ''
+        files = []
         for remote in self.get_remotes():
             logging.debug('getting lsjson from ' + remote + file)
             json_out = self._rclone.lsjson(remote, file)
-            json_ret = json_ret + '||' + json_out
-            #logging.debug('json_ret: ' + json_ret)
-        return common.combine_jsons(json_ret)
+            tmp_json = json.loads(json_out)
+            for tmp_json_file in tmp_json:
+                tmp_file = clfile.ClFile()
+                logging.debug('path: ' + tmp_json_file['Path'])
+                tmp_file.remote = remote
+                tmp_file.path = tmp_json_file['Path']
+                tmp_file.name = tmp_json_file['Name']
+                tmp_file.size = tmp_json_file['Size']
+                tmp_file.mime_type = tmp_json_file['MimeType']
+                tmp_file.mod_time = tmp_json_file['ModTime']
+                tmp_file.is_dir = tmp_json_file['IsDir']
+                tmp_file.id = tmp_json_file['ID']
+                files.append(tmp_file)
+                json_ret = json_ret + '||' + json_out
+                #logging.debug('json_ret: ' + json_ret)
+        return files
 
     def get_size(self):
         logging.debug('getting total size')

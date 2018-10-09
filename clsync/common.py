@@ -55,3 +55,7 @@ def execute(command_with_args):
             "code": -30,
             "error": generic_e
         }
+
+
+def print_line(line):
+    print(line)

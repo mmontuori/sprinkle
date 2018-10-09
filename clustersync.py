@@ -11,6 +11,7 @@ __version__ = "0.1"
 
 from clsync import clsync
 from mmontuori import config
+from clsync import common
 import logging
 import getopt
 import sys
@@ -67,10 +68,8 @@ def read_config(config_file):
 def init_logging(debug):
     if debug.lower() == "true":
         logging.getLogger().setLevel(logging.DEBUG)
-        logging.info('debug mode initialized')
     else:
         logging.getLogger().setLevel(logging.INFO)
-        logging.info('info mode initialized')
 
 
 def main(argv):
@@ -82,19 +81,28 @@ def main(argv):
 
     cl_sync = clsync.ClSync(__config)
 
+    common.print_line('ClusterSync Utility')
+
     if __args[0] == 'ls':
-        logging.debug('command ls')
+        common.print_line('file list:')
         if len(__args) == 1:
             logging.error('invalid ls command')
             usage_ls()
             sys.exit(-1)
-        cl_sync.lsjson(__args[1])
+        files = cl_sync.lsjson(__args[1])
+        logging.debug('files: ' + str(files))
+        for tmp_file in files:
+            common.print_line(tmp_file.name + ", " +
+                              str(tmp_file.is_dir) + ", " +
+                              tmp_file.path + ", " +
+                              tmp_file.mod_time + ", " +
+                              str(tmp_file.size) + ", " +
+                              tmp_file.remote
+                              )
     else:
         logging.error('invalid command')
         usage()
         sys.exit(-1)
-
-    cl_sync.sync("/dirtosync")
 
 
 if __name__ == "__main__":
