@@ -42,6 +42,7 @@ class RClone:
         return remotes
 
     def lsjson(self, remote, directory):
+        # TBD recursive lsjson
         logging.debug('running lsjson for ' + remote + directory)
         command_with_args = [self._rclone_exe, "lsjson", "--config", self._config_file, remote+directory]
         result = common.execute(command_with_args)

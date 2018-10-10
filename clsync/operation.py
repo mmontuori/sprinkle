@@ -15,7 +15,7 @@ class Operation(object):
 
     ADD = "add"
     UPDATE = "update"
-    REMOVE = ""
+    REMOVE = "remove"
 
     def __init__(self, operation, src, dst):
         if operation.lower() != 'add' and operation.lower() != 'update' and operation.lower() != 'remove':
