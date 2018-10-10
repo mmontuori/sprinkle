@@ -12,6 +12,7 @@ __version__ = "0.1"
 import logging
 import json
 from clsync import common
+from clsync import exceptions
 
 class RClone:
 
@@ -47,7 +48,10 @@ class RClone:
         logging.debug('result: ' + str(result))
         if result['error'] is not '':
             logging.error('error getting remotes objects')
-            raise Exception('error getting remote object. ' + result['error'])
+            if result['error'].find("directory not found") != -1:
+                raise exceptions.FileNotFoundException(result['error'])
+            else:
+                raise Exception('error getting remote object. ' + result['error'])
         lsjson = result['out']
         logging.debug('returning ' + str(lsjson))
         return lsjson

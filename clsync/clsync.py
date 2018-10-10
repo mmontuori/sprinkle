@@ -13,6 +13,8 @@ import logging
 from clsync import rclone
 from clsync import common
 from clsync import clfile
+from clsync import exceptions
+from clsync import operation
 import json
 import os
 
@@ -45,10 +47,13 @@ class ClSync:
     def ls(self, file):
         logging.debug('lsjson of file: ' + file)
         json_ret = ''
-        files = []
+        files = {}
         for remote in self.get_remotes():
             logging.debug('getting lsjson from ' + remote + file)
-            json_out = self._rclone.lsjson(remote, file)
+            try:
+                json_out = self._rclone.lsjson(remote, file)
+            except exceptions.FileNotFoundException as e:
+                json_out = '[]'
             tmp_json = json.loads(json_out)
             for tmp_json_file in tmp_json:
                 tmp_file = clfile.ClFile()
@@ -61,7 +66,7 @@ class ClSync:
                 tmp_file.mod_time = tmp_json_file['ModTime']
                 tmp_file.is_dir = tmp_json_file['IsDir']
                 tmp_file.id = tmp_json_file['ID']
-                files.append(tmp_file)
+                files[tmp_json_file['Path']] = tmp_file
                 json_ret = json_ret + '||' + json_out
                 #logging.debug('json_ret: ' + json_ret)
         return files
@@ -108,7 +113,7 @@ class ClSync:
         return best_remote
 
     def index_local_dir(self, local_dir):
-        clfiles = []
+        clfiles = {}
         for root, dirs, files in os.walk(local_dir):
             for name in dirs:
                 full_path = os.path.join(root, name)
@@ -119,7 +124,7 @@ class ClSync:
                 tmp_clfile.name = name
                 tmp_clfile.size = "-1"
                 tmp_clfile.mod_time = os.stat(full_path).st_mtime
-                clfiles.append(tmp_clfile)
+                clfiles[tmp_clfile.path] = tmp_clfile
             for name in files:
                 full_path = os.path.join(root, name)
                 # logging.debug('adding ' + full_path + ' to list')
@@ -129,9 +134,32 @@ class ClSync:
                 tmp_clfile.name = name
                 tmp_clfile.size = os.stat(full_path).st_size
                 tmp_clfile.mod_time = os.stat(full_path).st_mtime
-                clfiles.append(tmp_clfile)
+                clfiles[tmp_clfile.path] = tmp_clfile
         logging.debug('retrieved ' + str(len(clfiles)) + ' files')
         return clfiles
+
+    def compare_clfiles(self, local_dir, local_clfiles, remote_clfiles):
+        logging.debug('comparing clfiles')
+        logging.debug('local directory: ' + local_dir)
+        logging.debug('local clfiles size: ' + str(len(local_clfiles)))
+        logging.debug('remote clfiles size: ' + str(len(remote_clfiles)))
+        basedir = os.path.dirname(local_dir)
+        logging.debug('base directory: ' + basedir)
+        operations = []
+        for local_path in local_clfiles:
+            local_clfile = local_clfiles[local_path]
+            logging.debug('checking local clfile: ' + local_path + " name: " + local_clfile.name)
+            rel_name = local_clfile.path.replace(basedir,'').replace('\\','/')
+            logging.debug('relative name: ' + rel_name)
+            if local_path not in remote_clfiles:
+                logging.debug('not found in remote_clfiles')
+                local_clfile.remote_path = rel_name
+                op = operation.Operation(operation.Operation.ADD,
+                                         local_clfile, None)
+                operations.append(op)
+            # UPDATE operation
+            # REMOVE operation
+        return operations
 
     def backup(self, local_dir):
         logging.debug('backing up directory ' + local_dir)
@@ -139,11 +167,17 @@ class ClSync:
             logging.error("local directory " + local_dir + " not found. Cannot continue!")
             raise Exception("Local directory " + local_dir + " not found")
         local_clfiles = self.index_local_dir(local_dir)
-        # index cloud directory
-        # compare
-        # insert new files
-        # update existing files
-        # delete non existing cloud files
+        remote_clfiles = self.ls(os.path.basename(local_dir))
+        ops = self.compare_clfiles(local_dir, local_clfiles, remote_clfiles)
+        for op in ops:
+            logging.debug('operation: ' + op.operation + ", path: " + op.src.path + ', ' +
+                          op.src.remote_path)
+            if op.src.is_dir:
+                logging.debug('skipping directory ' + op.src.path)
+                continue
+            best_remote = self.get_best_remote(int(op.src.size))
+            logging.debug('best remote: ' + best_remote)
+            self.copy(op.src.path, op.src.remote_path, best_remote)
 
     def rmdir(self, directory):
         logging.debug('removing directory ' + directory)
@@ -160,8 +194,9 @@ class ClSync:
     def delete(self, path):
         logging.debug('deleting path ' + path)
 
-    def copy(self, src, dst):
-        logging.debug('copy ' + src + ' to ' + dst)
+    def copy(self, src, dst, remote):
+        logging.debug('copy ' + src + ' to ' + remote + dst)
+        self._rclone.copy(src, remote+dst)
 
     def move(self, src, dst):
         logging.debug('move ' + src + ' to ' + dst)

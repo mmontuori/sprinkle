@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-container class for a file
+custom file not found exception
 
 __author__ = "Michael Montuori [michael.montuori@gmail.com]"
 __copyright__ = "Copyright 2017 Michael Montuori. All rights reserved."
@@ -9,14 +9,7 @@ __license__ = "closed"
 __version__ = "0.1"
 """
 
-class ClFile(object):
+class FileNotFoundException(Exception):
 
-    remote = None
-    path = None
-    remote_path = None
-    name = None
-    size = None
-    mime_type = None
-    mod_time = None
-    is_dir = None
-    id = None
+    def __init__(self, message):
+        self.message = message
