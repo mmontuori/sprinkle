@@ -120,21 +120,21 @@ class ClSync:
                 # logging.debug('adding ' + full_path + ' to list')
                 tmp_clfile = clfile.ClFile()
                 tmp_clfile.is_dir = True
-                tmp_clfile.path = full_path
+                tmp_clfile.path = os.path.dirname(full_path)
                 tmp_clfile.name = name
                 tmp_clfile.size = "-1"
                 tmp_clfile.mod_time = os.stat(full_path).st_mtime
-                clfiles[tmp_clfile.path] = tmp_clfile
+                clfiles[tmp_clfile.path+'/'+tmp_clfile.name] = tmp_clfile
             for name in files:
                 full_path = os.path.join(root, name)
                 # logging.debug('adding ' + full_path + ' to list')
                 tmp_clfile = clfile.ClFile()
                 tmp_clfile.is_dir = False
-                tmp_clfile.path = full_path
+                tmp_clfile.path = os.path.dirname(full_path)
                 tmp_clfile.name = name
                 tmp_clfile.size = os.stat(full_path).st_size
                 tmp_clfile.mod_time = os.stat(full_path).st_mtime
-                clfiles[tmp_clfile.path] = tmp_clfile
+                clfiles[tmp_clfile.path+'/'+tmp_clfile.name] = tmp_clfile
         logging.debug('retrieved ' + str(len(clfiles)) + ' files')
         return clfiles
 
@@ -143,13 +143,11 @@ class ClSync:
         logging.debug('local directory: ' + local_dir)
         logging.debug('local clfiles size: ' + str(len(local_clfiles)))
         logging.debug('remote clfiles size: ' + str(len(remote_clfiles)))
-        basedir = os.path.dirname(local_dir)
-        logging.debug('base directory: ' + basedir)
         operations = []
         for local_path in local_clfiles:
             local_clfile = local_clfiles[local_path]
             logging.debug('checking local clfile: ' + local_path + " name: " + local_clfile.name)
-            rel_name = local_clfile.path.replace(basedir,'').replace('\\','/')
+            rel_name = common.remove_localdir(local_dir, local_clfile.path)
             logging.debug('relative name: ' + rel_name)
             if local_path not in remote_clfiles:
                 logging.debug('not found in remote_clfiles')
@@ -177,7 +175,7 @@ class ClSync:
                 continue
             best_remote = self.get_best_remote(int(op.src.size))
             logging.debug('best remote: ' + best_remote)
-            self.copy(op.src.path, op.src.remote_path, best_remote)
+            self.copy(op.src.path+'/'+op.src.name, op.src.remote_path, best_remote)
 
     def rmdir(self, directory):
         logging.debug('removing directory ' + directory)

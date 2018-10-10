@@ -29,6 +29,11 @@ def is_dir(dir):
         return True
 
 
+def remove_localdir(local_dir, path):
+    basedir = os.path.dirname(local_dir)
+    return path.replace(basedir,'').replace('\\', '/')
+
+
 def execute(command_with_args):
     logging.debug("Invoking : %s", " ".join(command_with_args))
     try:
