@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 """
 clustersync main module
-
+"""
 __author__ = "Michael Montuori [michael.montuori@gmail.com]"
 __copyright__ = "Copyright 2017 Michael Montuori. All rights reserved."
 __credits__ = []
 __license__ = "closed"
 __version__ = "0.1"
-"""
 
 from clsync import clsync
+from clsync import rclone
 from mmontuori import config
 from clsync import common
 import logging
@@ -18,22 +18,29 @@ import sys
 
 
 def usage():
-    print("usage: clustersync.py [-h] {-c|--conf <config file>} {command=None} {arg...arg}")
+    print("usage: sprinkle.py [-v] [-h] {-c|--conf <config file>} {command=None} {arg...arg}")
     print("       -h = help")
     print("       -c = configuration file")
+    print("       -v = print version")
     print("commands:")
     print("       ls = list files")
     print("   backup = backup files to clustered drives")
 
 
 def usage_ls():
-    print("usage: clustersync.py {-c|--conf <config file>} ls {pattern}")
+    print("usage: sprinkle.py {-c|--conf <config file>} ls {pattern}")
     print("*** TO BE FINISHED ***")
 
 
 def usage_backup():
-    print("usage: clustersync.py {-c|--conf <config file>} backup {local dir}")
+    print("usage: sprinkle.py {-c|--conf <config file>} backup {local dir}")
     print("*** TO BE FINISHED ***")
+
+
+def print_version():
+    print("clustersync version: " + __version__)
+    print("clsync module version: " + clsync.__version__)
+    print("rclone module version: " + rclone.__version__)
 
 
 def read_args(argv):
@@ -42,7 +49,7 @@ def read_args(argv):
     global __args
 
     try:
-        opts, args = getopt.getopt(argv, "hc:", ["help", "conf="])
+        opts, args = getopt.getopt(argv, "vhc:", ["help", "conf="])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -50,7 +57,10 @@ def read_args(argv):
     for opt, arg in opts:
         if opt in ('-h', '--help'):
             usage()
-            sys.exit()
+            sys.exit(0)
+        elif opt in ('-v', '--version'):
+            print_version()
+            sys.exit(0)
         elif opt in ("-c", "--configfile"):
             __configfile = arg
 

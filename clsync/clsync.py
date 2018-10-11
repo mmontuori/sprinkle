@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 """
 clustersync main module
-
+"""
 __author__ = "Michael Montuori [michael.montuori@gmail.com]"
 __copyright__ = "Copyright 2017 Michael Montuori. All rights reserved."
 __credits__ = []
 __license__ = "closed"
 __version__ = "0.1"
-"""
 
 import logging
 from clsync import rclone
