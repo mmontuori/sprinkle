@@ -39,12 +39,19 @@ class ClSync:
             self._distribution_type = 'mas'
         if self._distribution_type == 'mas':
             self._cached_free = {}
+        if 'compare_method' in config:
+            self._compare_method = config['compare_method']
+        else:
+            self._compare_method = 'size'
         self._remotes = None
+        self._remote_calls = 0
 
     def get_remotes(self):
         logging.debug('getting rclone remotes')
-        if self._remotes is None:
+        if self._remotes is None or self._remote_calls > 100:
             self._remotes = self._rclone.get_remotes()
+            self._remote_calls = 0
+        self._remote_calls += 1
         return self._remotes
 
     def mkdir(self, directory):
@@ -68,7 +75,7 @@ class ClSync:
             tmp_json = json.loads(json_out)
             for tmp_json_file in tmp_json:
                 tmp_file = clfile.ClFile()
-                logging.debug('path: ' + file + '/' + tmp_json_file['Path'])
+                #logging.debug('path: ' + file + '/' + tmp_json_file['Path'])
                 tmp_file.remote = remote
                 tmp_file.path = file + '/' + tmp_json_file['Path']
                 tmp_file.name = tmp_json_file['Name']
@@ -115,9 +122,11 @@ class ClSync:
             logging.debug('selecting best remote with the most available space to store size: ' + str(requested_size))
             best_remote = None
             highest_size = 0
+            size = 0
             for remote in self.get_remotes():
                 if remote not in self._cached_free:
                     size = self._rclone.get_free(remote)
+                    self._cached_free[remote] = size
                 else:
                     size = self._cached_free[remote]
                 logging.debug('free of ' + remote + ' is ' + str(size))
@@ -125,7 +134,7 @@ class ClSync:
                     if requested_size <= size:
                         highest_size = size
                         best_remote = remote
-                self._cached_free[best_remote] = size - requested_size
+            self._cached_free[best_remote] = highest_size - requested_size
             return best_remote
         else:
             logging.error('distribution mode ' + self._distribution_type + ' not supported.')
@@ -143,7 +152,7 @@ class ClSync:
                 tmp_clfile.name = name
                 tmp_clfile.size = "-1"
                 tmp_clfile.mod_time = os.stat(full_path).st_mtime
-                clfiles[tmp_clfile.path+'/'+tmp_clfile.name] = tmp_clfile
+                clfiles[common.normalize_path(tmp_clfile.path+'/'+tmp_clfile.name)] = tmp_clfile
             for name in files:
                 full_path = os.path.join(root, name)
                 # logging.debug('adding ' + full_path + ' to list')
@@ -153,7 +162,7 @@ class ClSync:
                 tmp_clfile.name = name
                 tmp_clfile.size = os.stat(full_path).st_size
                 tmp_clfile.mod_time = os.stat(full_path).st_mtime
-                clfiles[tmp_clfile.path+'/'+tmp_clfile.name] = tmp_clfile
+                clfiles[common.normalize_path(tmp_clfile.path+'/'+tmp_clfile.name)] = tmp_clfile
         logging.debug('retrieved ' + str(len(clfiles)) + ' files')
         return clfiles
 
@@ -162,6 +171,7 @@ class ClSync:
         logging.debug('local directory: ' + local_dir)
         logging.debug('local clfiles size: ' + str(len(local_clfiles)))
         logging.debug('remote clfiles size: ' + str(len(remote_clfiles)))
+        remote_dir = os.path.dirname(local_dir)
         operations = []
         for local_path in local_clfiles:
             local_clfile = local_clfiles[local_path]
@@ -180,20 +190,33 @@ class ClSync:
             else:
                 logging.debug('file found in remote_clfiles')
                 remote_clfile = remote_clfiles[rel_name]
-                size_local = local_clfile.size
-                size_remote = remote_clfile.size
-                current_remote = remote_clfiles[rel_name].remote
-                logging.debug('local_file.size:' + str(local_clfile.size) +
-                              ', remote_clfile.size:' + str(remote_clfile.size))
-                if size_local != size_remote:
-                    logging.debug('file has changed')
-                    local_clfile.remote_path = rel_path
-                    local_clfile.remote = current_remote
-                    op = operation.Operation(operation.Operation.UPDATE,
-                                             local_clfile, None)
-                    operations.append(op)
+                if self._compare_method == 'size':
+                    size_local = local_clfile.size
+                    size_remote = remote_clfile.size
+                    current_remote = remote_clfiles[rel_name].remote
+                    logging.debug('local_file.size:' + str(local_clfile.size) +
+                                  ', remote_clfile.size:' + str(remote_clfile.size))
+                    if size_local != size_remote:
+                        logging.debug('file has changed')
+                        local_clfile.remote_path = rel_path
+                        local_clfile.remote = current_remote
+                        op = operation.Operation(operation.Operation.UPDATE,
+                                                 local_clfile, None)
+                        operations.append(op)
+                else:
+                    logging.error('compare_method: ' + self._compare_method + ' not valid!')
+                    raise Exception('compare_method: ' + self._compare_method + ' not valid!')
 
-        # REMOVE operation
+        for remote_path in remote_clfiles:
+            remote_clfile = remote_clfiles[remote_path]
+            logging.debug('checking file ' + remote_dir+remote_path + ' for deletion')
+            if remote_dir+remote_path not in local_clfiles:
+                logging.debug('file ' + remote_path + ' has been deleted')
+                remote_clfile.remote_path = rel_path
+                op = operation.Operation(operation.Operation.REMOVE,
+                                         remote_clfile, None)
+                operations.append(op)
+
         return operations
 
     def backup(self, local_dir):
@@ -217,6 +240,8 @@ class ClSync:
                 best_remote = self.get_best_remote(int(op.src.size))
                 logging.debug('best remote: ' + best_remote)
                 self.copy(op.src.path + '/' + op.src.name, op.src.remote_path, op.src.remote)
+            if op.operation == operation.Operation.REMOVE:
+                self.delete_file(op.src.path, op.src.remote)
 
     def rmdir(self, directory):
         logging.debug('removing directory ' + directory)
@@ -227,8 +252,9 @@ class ClSync:
     def touch(self, file):
         logging.debug('touching file ' + file)
 
-    def delete_file(self, file):
-        logging.debug('deleting file ' + file)
+    def delete_file(self, file, remote):
+        logging.debug('deleting file ' + remote+file)
+        self._rclone.delete_file(remote, file)
 
     def delete(self, path):
         logging.debug('deleting path ' + path)

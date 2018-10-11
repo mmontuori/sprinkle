@@ -34,6 +34,10 @@ def remove_localdir(local_dir, path):
     return path.replace(basedir,'').replace('\\', '/')
 
 
+def normalize_path(path):
+    return path.replace('\\', '/')
+
+
 def execute(command_with_args):
     logging.debug("Invoking : %s", " ".join(command_with_args))
     try:
@@ -52,8 +56,8 @@ def execute(command_with_args):
 
             return {
                 "code": proc.returncode,
-                "out": out.decode('ASCII'),
-                "error": err.decode('ASCII')
+                "out": out.decode('utf-8'),
+                "error": err.decode('utf-8')
             }
     except FileNotFoundError as not_found_e:
         logging.error("Executable not found. %s", not_found_e)
