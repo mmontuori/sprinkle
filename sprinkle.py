@@ -7,10 +7,11 @@ __copyright__ = "Copyright 2017 Michael Montuori. All rights reserved."
 __credits__ = []
 __license__ = "closed"
 __version__ = "0.1"
+__revision__ = "1"
 
 from clsync import clsync
 from clsync import rclone
-from mmontuori import config
+from clsync import config
 from clsync import common
 import logging
 import getopt
@@ -25,6 +26,7 @@ def usage():
     print("commands:")
     print("       ls = list files")
     print("   backup = backup files to clustered drives")
+    print("  restore = restore files from clustered drives")
 
 
 def usage_ls():
@@ -37,10 +39,15 @@ def usage_backup():
     print("*** TO BE FINISHED ***")
 
 
+def usage_restore():
+    print("usage: sprinkle.py {-c|--conf <config file>} restore {remote dir} {local dir}")
+    print("*** TO BE FINISHED ***")
+
+
 def print_version():
-    print("clustersync version: " + __version__)
-    print("clsync module version: " + clsync.__version__)
-    print("rclone module version: " + rclone.__version__)
+    print("clustersync version: " + __version__ + '.' + __revision__)
+    print("clsync module version: " + clsync.__version__ + '.' + clsync.__revision__)
+    print("rclone module version: " + rclone.__version__ + '.' + rclone.__revision__)
 
 
 def read_args(argv):
@@ -121,6 +128,10 @@ def backup():
     cl_sync.backup(local_dir)
 
 
+def restore():
+    logging.warning('restore function not implemented yet')
+
+
 def main(argv):
     logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
     read_args(argv)
@@ -134,6 +145,8 @@ def main(argv):
         ls()
     elif __args[0] == 'backup':
         backup()
+    elif __args[0] == 'restore':
+        restore()
     else:
         logging.error('invalid command')
         usage()
