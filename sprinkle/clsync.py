@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-clustersync main module
+clsync module
 """
 __author__ = "Michael Montuori [michael.montuori@gmail.com]"
 __copyright__ = "Copyright 2017 Michael Montuori. All rights reserved."
@@ -10,11 +10,11 @@ __version__ = "0.1"
 __revision__ = "1"
 
 import logging
-from clsync import rclone
-from clsync import common
-from clsync import clfile
-from clsync import exceptions
-from clsync import operation
+from sprinkle import rclone
+from sprinkle import common
+from sprinkle import clfile
+from sprinkle import exceptions
+from sprinkle import operation
 import json
 import os
 

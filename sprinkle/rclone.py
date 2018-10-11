@@ -11,8 +11,8 @@ __revision__ = "1"
 
 import logging
 import json
-from clsync import common
-from clsync import exceptions
+from sprinkle import common
+from sprinkle import exceptions
 
 class RClone:
 

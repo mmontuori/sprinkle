@@ -1,1 +1,1 @@
-ClusterSync README
+Sprinkle README

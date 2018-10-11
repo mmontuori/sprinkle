@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-clustersync main module
+sprinkle main module
 """
 __author__ = "Michael Montuori [michael.montuori@gmail.com]"
 __copyright__ = "Copyright 2017 Michael Montuori. All rights reserved."
@@ -9,10 +9,10 @@ __license__ = "closed"
 __version__ = "0.1"
 __revision__ = "1"
 
-from clsync import clsync
-from clsync import rclone
-from clsync import config
-from clsync import common
+from sprinkle import clsync
+from sprinkle import rclone
+from sprinkle import config
+from sprinkle import common
 import logging
 import getopt
 import sys
@@ -45,8 +45,8 @@ def usage_restore():
 
 
 def print_version():
-    print("clustersync version: " + __version__ + '.' + __revision__)
-    print("clsync module version: " + clsync.__version__ + '.' + clsync.__revision__)
+    print("sprinkle version: " + __version__ + '.' + __revision__)
+    print("sprinkle module version: " + clsync.__version__ + '.' + clsync.__revision__)
     print("rclone module version: " + rclone.__version__ + '.' + rclone.__revision__)
 
 
@@ -139,7 +139,7 @@ def main(argv):
     init_logging(__config['debug'])
     logging.debug('config: ' + str(__config))
 
-    common.print_line('ClusterSync Utility')
+    common.print_line('Sprinkle Utility')
 
     if __args[0] == 'ls':
         ls()

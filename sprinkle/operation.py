@@ -9,7 +9,7 @@ __license__ = "closed"
 __version__ = "0.1"
 __revision__ = "1"
 
-from clsync import clfile
+from sprinkle import clfile
 
 class Operation(object):
 
