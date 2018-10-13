@@ -30,9 +30,15 @@ class RClone:
         self._config_file = config_file
         self._rclone_exe = rclone_exe
 
-    def get_remotes(self):
+    def get_remotes(self, extra_args=[]):
         logging.debug('listing remotes')
-        command_with_args = [self._rclone_exe, "listremotes", "--config", self._config_file]
+        command_with_args = []
+        command_with_args.append(self._rclone_exe)
+        command_with_args.append("listremotes")
+        for extra_arg in extra_args:
+            command_with_args.append(extra_arg)
+        command_with_args.append("--config")
+        command_with_args.append(self._config_file)
         result = common.execute(command_with_args)
         logging.debug('result: ' + str(result))
         if result['error'] is not '':
@@ -41,9 +47,16 @@ class RClone:
         remotes = result['out'].splitlines()
         return remotes
 
-    def lsjson(self, remote, directory):
+    def lsjson(self, remote, directory, extra_args=[]):
         logging.debug('running lsjson for ' + remote + directory)
-        command_with_args = [self._rclone_exe, "lsjson", "--recursive", "--config", self._config_file, remote+directory]
+        command_with_args = []
+        command_with_args.append(self._rclone_exe)
+        command_with_args.append("lsjson")
+        for extra_arg in extra_args:
+            command_with_args.append(extra_arg)
+        command_with_args.append("--config")
+        command_with_args.append(self._config_file)
+        command_with_args.append(remote+directory)
         result = common.execute(command_with_args)
         logging.debug('result: ' + str(result))
         if result['error'] is not '':
@@ -140,9 +153,17 @@ class RClone:
         logging.debug('returning ' + str(out))
         return out
 
-    def copy(self, src, dst):
+    def copy(self, src, dst, extra_args=[]):
         logging.debug('running copy from ' + src + " to " + dst)
-        command_with_args = [self._rclone_exe, "copy", "--config", self._config_file, src, dst]
+        command_with_args = []
+        command_with_args.append(self._rclone_exe)
+        command_with_args.append("copy")
+        for extra_arg in extra_args:
+            command_with_args.append(extra_arg)
+        command_with_args.append("--config")
+        command_with_args.append(self._config_file)
+        command_with_args.append(src)
+        command_with_args.append(dst)
         result = common.execute(command_with_args)
         logging.debug('result: ' + str(result))
         if result['error'] is not '':
@@ -152,9 +173,17 @@ class RClone:
         logging.debug('returning ' + str(out))
         return out
 
-    def move(self, src, dst):
+    def move(self, src, dst, extra_args=[]):
         logging.debug('running move from ' + src + " to " + dst)
-        command_with_args = [self._rclone_exe, "move", "--config", self._config_file, src, dst]
+        command_with_args = []
+        command_with_args.append(self._rclone_exe)
+        command_with_args.append("move")
+        for extra_arg in extra_args:
+            command_with_args.append(extra_arg)
+        command_with_args.append("--config")
+        command_with_args.append(self._config_file)
+        command_with_args.append(src)
+        command_with_args.append(dst)
         result = common.execute(command_with_args)
         logging.debug('result: ' + str(result))
         if result['error'] is not '':
@@ -190,9 +219,15 @@ class RClone:
         logging.debug('total ' + str(json_obj['total']))
         return json_obj['total']
 
-    def sync(self, src, dst):
+    def sync(self, src, dst, extra_args=[]):
         logging.debug('running sync from ' + src + " to " + dst)
-        command_with_args = [self._rclone_exe, "sync", "--config", self._config_file, src, dst]
+        command_with_args = []
+        command_with_args.append(self._rclone_exe)
+        command_with_args.append("sync")
+        for extra_arg in extra_args:
+            command_with_args.append(extra_arg)
+        command_with_args.append("--config")
+        command_with_args.append(self._config_file, src, dst)
         result = common.execute(command_with_args)
         logging.debug('result: ' + str(result))
         if result['error'] is not '':

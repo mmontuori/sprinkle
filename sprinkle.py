@@ -103,17 +103,21 @@ def ls():
         usage_ls()
         sys.exit(-1)
     files = cl_sync.ls(__args[1])
-    #logging.debug('files: ' + str(files))
+    largest_length = 25
     for tmp_file in files:
-        if tmp_file.is_dir is True:
+        filename_length = len(files[tmp_file].path)
+        if not files[tmp_file].is_dir and filename_length > largest_length:
+            largest_length = filename_length
+    for tmp_file in files:
+        if files[tmp_file].is_dir is True:
             first_chars = '-d-'
         else:
             first_chars = '---'
         common.print_line(first_chars + " " +
-                          tmp_file.path.ljust(20) + " " +
-                          str(tmp_file.size).rjust(9) + " " +
-                          tmp_file.mod_time + " " +
-                          tmp_file.remote
+                          files[tmp_file].path.ljust(largest_length) + " " +
+                          str(files[tmp_file].size).rjust(9) + " " +
+                          files[tmp_file].mod_time + " " +
+                          files[tmp_file].remote
                           )
 
 
@@ -129,7 +133,15 @@ def backup():
 
 
 def restore():
-    logging.warning('restore function not implemented yet')
+    cl_sync = clsync.ClSync(__config)
+    if len(__args) == 2:
+        logging.error('invalid remote command')
+        usage_restore()
+        sys.exit(-1)
+    remote_path = __args[2]
+    local_dir = __args[1]
+    common.print_line('restoring ' + local_dir + ' from ' + remote_path)
+    cl_sync.restore(local_dir, remote_path)
 
 
 def main(argv):

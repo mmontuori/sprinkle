@@ -69,7 +69,7 @@ class ClSync:
         for remote in self.get_remotes():
             logging.debug('getting lsjson from ' + remote + file)
             try:
-                json_out = self._rclone.lsjson(remote, file)
+                json_out = self._rclone.lsjson(remote, file, ['--recursive'])
             except exceptions.FileNotFoundException as e:
                 json_out = '[]'
             tmp_json = json.loads(json_out)
@@ -243,6 +243,20 @@ class ClSync:
             if op.operation == operation.Operation.REMOVE:
                 self.delete_file(op.src.path, op.src.remote)
 
+    def restore(self, remote_path, local_dir):
+        logging.debug('restoring directory ' + local_dir + ' from ' + remote_path)
+        if not common.is_dir(local_dir):
+            logging.error('directory ' + local_dir + ' not found')
+            raise Exception('directory ' + local_dir + ' not found')
+        remote_clfiles = self.ls(remote_path)
+        for remote_clfile in remote_clfiles:
+            remote = remote_clfiles[remote_clfile].remote
+            path = remote_clfiles[remote_clfile].path
+            logging.debug('restoring file ' + os.path.dirname(path) + ' from remote '
+                          + remote)
+            self.copy_new(remote+os.path.dirname(path), local_dir)
+
+
     def rmdir(self, directory):
         logging.debug('removing directory ' + directory)
 
@@ -262,6 +276,10 @@ class ClSync:
     def copy(self, src, dst, remote):
         logging.debug('copy ' + src + ' to ' + remote + dst)
         self._rclone.copy(src, remote+dst)
+
+    def copy_new(self, src, dst):
+        logging.debug('copy ' + src + ' to ' + dst)
+        self._rclone.copy(src, dst)
 
     def move(self, src, dst):
         logging.debug('move ' + src + ' to ' + dst)
