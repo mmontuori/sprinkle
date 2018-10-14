@@ -16,12 +16,9 @@ from sprinkle import exceptions
 
 class RClone:
 
-    def __init__(self, config_file, rclone_exe="rclone"):
+    def __init__(self, config_file=None, rclone_exe="rclone"):
         logging.debug('constructing RClone')
-        if config_file == None:
-            logging.error("configuration file " + str(config_file) + " is None. Cannot continue!")
-            raise Exception("None value for configuration file")
-        if not common.is_file(config_file):
+        if config_file is not None and not common.is_file(config_file):
             logging.error("configuration file " + str(config_file) + " not found. Cannot continue!")
             raise Exception("Configuration file " + str(config_file) + " not found")
         if rclone_exe is not "rclone" and not common.is_file(rclone_exe):
@@ -37,8 +34,9 @@ class RClone:
         command_with_args.append("listremotes")
         for extra_arg in extra_args:
             command_with_args.append(extra_arg)
-        command_with_args.append("--config")
-        command_with_args.append(self._config_file)
+        if self._config_file is not None:
+            command_with_args.append("--config")
+            command_with_args.append(self._config_file)
         result = common.execute(command_with_args)
         logging.debug('result: ' + str(result))
         if result['error'] is not '':
@@ -54,8 +52,9 @@ class RClone:
         command_with_args.append("lsjson")
         for extra_arg in extra_args:
             command_with_args.append(extra_arg)
-        command_with_args.append("--config")
-        command_with_args.append(self._config_file)
+        if self._config_file is not None:
+            command_with_args.append("--config")
+            command_with_args.append(self._config_file)
         command_with_args.append(remote+directory)
         result = common.execute(command_with_args)
         logging.debug('result: ' + str(result))
@@ -71,7 +70,14 @@ class RClone:
 
     def get_about(self, remote):
         logging.debug('running about for ' + remote)
-        command_with_args = [self._rclone_exe, "about", "--json", "--config", self._config_file, remote]
+        command_with_args = []
+        command_with_args.append(self._rclone_exe)
+        command_with_args.append("about")
+        command_with_args.append("--json")
+        if self._config_file is not None:
+            command_with_args.append("--config")
+            command_with_args.append(self._config_file)
+        command_with_args.append(remote)
         result = common.execute(command_with_args)
         logging.debug('result: ' + str(result))
         if result['error'] is not '':
@@ -83,7 +89,13 @@ class RClone:
 
     def mkdir(self, remote, directory):
         logging.debug('running mkdir for ' + remote + ":" + directory)
-        command_with_args = [self._rclone_exe, "mkdir", "--config", self._config_file, remote + directory]
+        command_with_args = []
+        command_with_args.append(self._rclone_exe)
+        command_with_args.append("mkdir")
+        if self._config_file is not None:
+            command_with_args.append("--config")
+            command_with_args.append(self._config_file)
+        command_with_args.append(remote + directory)
         result = common.execute(command_with_args)
         logging.debug('result: ' + str(result))
         if result['error'] is not '':
@@ -95,7 +107,13 @@ class RClone:
 
     def rmdir(self, remote, directory):
         logging.debug('running rmdir for ' + remote + ":" + directory)
-        command_with_args = [self._rclone_exe, "rmdir", "--config", self._config_file, remote + directory]
+        command_with_args = []
+        command_with_args.append(self._rclone_exe)
+        command_with_args.append("rmdir")
+        if self._config_file is not None:
+            command_with_args.append("--config")
+            command_with_args.append(self._config_file)
+        command_with_args.append(remote + directory)
         result = common.execute(command_with_args)
         logging.debug('result: ' + str(result))
         if result['error'] is not '':
@@ -119,7 +137,13 @@ class RClone:
 
     def touch(self, remote, file):
         logging.debug('running touch for ' + remote + ":" + file)
-        command_with_args = [self._rclone_exe, "touch", "--config", self._config_file, remote + file]
+        command_with_args = []
+        command_with_args.append(self._rclone_exe)
+        command_with_args.append("touch")
+        if self._config_file is not None:
+            command_with_args.append("--config")
+            command_with_args.append(self._config_file)
+        command_with_args.append(remote + file)
         result = common.execute(command_with_args)
         logging.debug('result: ' + str(result))
         if result['error'] is not '':
@@ -131,7 +155,13 @@ class RClone:
 
     def delete_file(self, remote, file):
         logging.debug('running deleteFile for ' + remote + ":" + file)
-        command_with_args = [self._rclone_exe, "deletefile", "--config", self._config_file, remote + file]
+        command_with_args = []
+        command_with_args.append(self._rclone_exe)
+        command_with_args.append("deletefile")
+        if self._config_file is not None:
+            command_with_args.append("--config")
+            command_with_args.append(self._config_file)
+        command_with_args.append(remote + file)
         result = common.execute(command_with_args)
         logging.debug('result: ' + str(result))
         if result['error'] is not '':
@@ -143,7 +173,13 @@ class RClone:
 
     def delete(self, remote, file):
         logging.debug('running delete for ' + remote + ":" + file)
-        command_with_args = [self._rclone_exe, "delete", "--config", self._config_file, remote + file]
+        command_with_args = []
+        command_with_args.append(self._rclone_exe)
+        command_with_args.append("delete")
+        if self._config_file is not None:
+            command_with_args.append("--config")
+            command_with_args.append(self._config_file)
+        command_with_args.append(remote + file)
         result = common.execute(command_with_args)
         logging.debug('result: ' + str(result))
         if result['error'] is not '':
@@ -195,7 +231,14 @@ class RClone:
 
     def get_free(self, remote):
         logging.debug('running about for ' + remote)
-        command_with_args = [self._rclone_exe, "about", "--json", "--config", self._config_file, remote]
+        command_with_args = []
+        command_with_args.append(self._rclone_exe)
+        command_with_args.append("about")
+        command_with_args.append("--json")
+        if self._config_file is not None:
+            command_with_args.append("--config")
+            command_with_args.append(self._config_file)
+        command_with_args.append(remote)
         result = common.execute(command_with_args)
         logging.debug('result: ' + str(result))
         if result['error'] is not '':
@@ -208,7 +251,14 @@ class RClone:
 
     def get_size(self, remote):
         logging.debug('running about for ' + remote)
-        command_with_args = [self._rclone_exe, "about", "--json", "--config", self._config_file, remote]
+        command_with_args = []
+        command_with_args.append(self._rclone_exe)
+        command_with_args.append("about")
+        command_with_args.append("--json")
+        if self._config_file is not None:
+            command_with_args.append("--config")
+            command_with_args.append(self._config_file)
+        command_with_args.append(remote)
         result = common.execute(command_with_args)
         logging.debug('result: ' + str(result))
         if result['error'] is not '':

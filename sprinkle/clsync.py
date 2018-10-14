@@ -32,7 +32,11 @@ class ClSync:
             logging.error("working directory " + str(config['rclone_workdir']) + " not found. Cannot continue!")
             raise Exception("Working directory " + config['rclone_workdir'] + " not found")
         self._config = config
-        self._rclone = rclone.RClone(self._config['rclone_config'], self._config['rclone_exe'])
+        if 'rclone_config' in self._config:
+            rclone_config = self._config['rclone_config']
+        else:
+            rclone_config = None
+        self._rclone = rclone.RClone(rclone_config, self._config['rclone_exe'])
         if 'distribution_type' in config:
             self._distribution_type = config['distribution_type']
         else:
