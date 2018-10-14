@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 config.py: configuration module responsible for loading configuration and rules
 """
