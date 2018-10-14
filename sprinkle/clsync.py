@@ -25,10 +25,7 @@ class ClSync:
         if config is None:
             logging.error("configuration is None. Cannot continue!")
             raise Exception("None value for configuration")
-        if config['rclone_workdir'] == None:
-            logging.error("working directory is None. Cannot continue!")
-            raise Exception("None value for working directory")
-        if not common.is_dir(config['rclone_workdir']):
+        if 'rclone_workdir' in config and config['rclone_workdir'] == None and not common.is_dir(config['rclone_workdir']):
             logging.error("working directory " + str(config['rclone_workdir']) + " not found. Cannot continue!")
             raise Exception("Working directory " + config['rclone_workdir'] + " not found")
         self._config = config
