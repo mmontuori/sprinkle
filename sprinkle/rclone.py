@@ -7,7 +7,7 @@ __copyright__ = "Copyright 2017 Michael Montuori. All rights reserved."
 __credits__ = []
 __license__ = "closed"
 __version__ = "0.1"
-__revision__ = "1"
+__revision__ = "2"
 
 import logging
 import json
@@ -23,6 +23,7 @@ class RClone:
             raise Exception("Configuration file " + str(config_file) + " not found")
         if rclone_exe is not "rclone" and not common.is_file(rclone_exe):
             logging.error("rclone executable " + str(rclone_exe) + " not found. Cannot continue!")
+            common.print_line('RCLONE.EXE not in PATH. Put it in PATH or modify sprinkle.conf to point to it.')
             raise Exception("rclone executable " + str(rclone_exe) + " not found")
         self._config_file = config_file
         self._rclone_exe = rclone_exe

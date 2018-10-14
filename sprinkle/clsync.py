@@ -7,7 +7,7 @@ __copyright__ = "Copyright 2017 Michael Montuori. All rights reserved."
 __credits__ = []
 __license__ = "closed"
 __version__ = "0.1"
-__revision__ = "1"
+__revision__ = "2"
 
 import logging
 from sprinkle import rclone
@@ -36,7 +36,10 @@ class ClSync:
             rclone_config = self._config['rclone_config']
         else:
             rclone_config = None
-        self._rclone = rclone.RClone(rclone_config, self._config['rclone_exe'])
+        if 'rclone_exe' not in self._config:
+            self._rclone = rclone.RClone(rclone_config)
+        else:
+            self._rclone = rclone.RClone(rclone_config, self._config['rclone_exe'])
         if 'distribution_type' in config:
             self._distribution_type = config['distribution_type']
         else:

@@ -7,7 +7,7 @@ __copyright__ = "Copyright 2017 Michael Montuori. All rights reserved."
 __credits__ = []
 __license__ = "closed"
 __version__ = "0.1"
-__revision__ = "1"
+__revision__ = "2"
 
 from sprinkle import clfile
 
