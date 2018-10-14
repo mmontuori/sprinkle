@@ -102,7 +102,7 @@ def ls():
         logging.error('invalid ls command')
         usage_ls()
         sys.exit(-1)
-    files = cl_sync.ls(__args[1])
+    files = cl_sync.ls(common.remote_ending_slash(__args[1]))
     largest_length = 25
     for tmp_file in files:
         filename_length = len(files[tmp_file].path)
@@ -127,7 +127,7 @@ def backup():
         logging.error('invalid backup command')
         usage_backup()
         sys.exit(-1)
-    local_dir = __args[1]
+    local_dir = common.remote_ending_slash(__args[1])
     common.print_line('backing up ' + local_dir + '...')
     cl_sync.backup(local_dir)
 
@@ -139,7 +139,7 @@ def restore():
         usage_restore()
         sys.exit(-1)
     remote_path = __args[2]
-    local_dir = __args[1]
+    local_dir = common.remote_ending_slash(__args[1])
     common.print_line('restoring ' + local_dir + ' from ' + remote_path)
     cl_sync.restore(local_dir, remote_path)
 

@@ -40,6 +40,10 @@ class RClone:
             command_with_args.append(self._config_file)
         result = common.execute(command_with_args)
         logging.debug('result: ' + str(result))
+        if result['code'] == -20:
+            logging.error("rclone executable not found. Please make sure it's in the PATH or in the config file")
+            common.print_line("rclone executable not found. Please make sure it's in the PATH or in the config file")
+            raise Exception("rclone executable not found. Please make sure it's in the PATH or in the config file")
         if result['error'] is not '':
             logging.error('error getting remotes objects')
             raise Exception('error getting remote object. ' + result['error'])

@@ -47,9 +47,6 @@ def execute(command_with_args):
                 stderr=subprocess.PIPE) as proc:
             (out, err) = proc.communicate()
 
-            # out = proc.stdout.read()
-            # err = proc.stderr.read()
-
             logging.debug(out)
             if err:
                 logging.warning(err.decode("utf-8").replace("\\n", "\n"))
@@ -75,3 +72,8 @@ def execute(command_with_args):
 
 def print_line(line):
     print(line)
+
+
+def remote_ending_slash(path):
+    if path.endswith('/'):
+        return path[0:len(path)-1]

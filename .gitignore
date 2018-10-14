@@ -113,3 +113,6 @@ dmypy.json
 # custom
 .idea
 .vscode
+
+# ignore test directory
+test/
