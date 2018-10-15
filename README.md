@@ -1,8 +1,8 @@
 # Sprinkle
 
 Sprinkle is a volume clustering utility based on [RClone](https://rclone.org). It presents all the
-RClone available instances as a single clustered volume. It supports 1-way sync mainly for
-backups.
+RClone available volumes as a single clustered volume. It supports 1-way sync mainly for
+backup and recovery.
 
 ## Getting Started
 
@@ -16,12 +16,10 @@ cd sprinkle
 
 ## Prerequisites
 
-```
 * Python 3 installed
 * RClone installed and available in the PATH or configured in sprinkle.conf file.
-  https://rclone.org for reference.
+  [https://rclone.org](https://rclone.org) for reference.
 * Few storage drives available from the supported RClone drives
-```
 
 ## Installing
 
