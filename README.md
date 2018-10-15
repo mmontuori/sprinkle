@@ -18,7 +18,8 @@ cd sprinkle
 
 ```
 * Python 3 installed
-* RClone installed and available in the PATH or configured in sprinkle.conf file. https://rclone.org for reference.
+* RClone installed and available in the PATH or configured in sprinkle.conf file.
+  https://rclone.org for reference.
 * Few storage drives available from the supported RClone drives
 ```
 
