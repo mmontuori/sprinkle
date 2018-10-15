@@ -74,6 +74,9 @@ def print_line(line):
     print(line)
 
 
-def remote_ending_slash(path):
+def remove_ending_slash(path):
     if path.endswith('/'):
+        logging.debug('removing ending slash from ' + path)
         return path[0:len(path)-1]
+    else:
+        return path
