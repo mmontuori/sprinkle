@@ -201,10 +201,12 @@ class RClone:
         command_with_args.append("copy")
         for extra_arg in extra_args:
             command_with_args.append(extra_arg)
-        command_with_args.append("--config")
-        command_with_args.append(self._config_file)
+        if self._config_file is not None:
+            command_with_args.append("--config")
+            command_with_args.append(self._config_file)
         command_with_args.append(src)
         command_with_args.append(dst)
+        logging.debug('command args: ' + str(command_with_args))
         result = common.execute(command_with_args)
         logging.debug('result: ' + str(result))
         if result['error'] is not '':
@@ -221,8 +223,9 @@ class RClone:
         command_with_args.append("move")
         for extra_arg in extra_args:
             command_with_args.append(extra_arg)
-        command_with_args.append("--config")
-        command_with_args.append(self._config_file)
+        if self._config_file is not None:
+            command_with_args.append("--config")
+            command_with_args.append(self._config_file)
         command_with_args.append(src)
         command_with_args.append(dst)
         result = common.execute(command_with_args)
@@ -281,8 +284,9 @@ class RClone:
         command_with_args.append("sync")
         for extra_arg in extra_args:
             command_with_args.append(extra_arg)
-        command_with_args.append("--config")
-        command_with_args.append(self._config_file, src, dst)
+        if self._config_file is not None:
+            command_with_args.append("--config")
+            command_with_args.append(self._config_file, src, dst)
         result = common.execute(command_with_args)
         logging.debug('result: ' + str(result))
         if result['error'] is not '':
