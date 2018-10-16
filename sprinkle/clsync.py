@@ -261,7 +261,7 @@ class ClSync:
         ops = self.compare_clfiles(local_dir, local_clfiles, remote_clfiles)
         for op in ops:
             logging.debug('operation: ' + op.operation + ", path: " + op.src.path)
-            if op.src.is_dir:
+            if op.src.is_dir and op.operation != operation.Operation.REMOVE:
                 logging.debug('skipping directory ' + op.src.path)
                 continue
             if op.operation == operation.Operation.ADD:
@@ -273,9 +273,18 @@ class ClSync:
             if op.operation == operation.Operation.UPDATE:
                 best_remote = self.get_best_remote(int(op.src.size))
                 logging.debug('best remote: ' + best_remote)
+                common.print_line('backing up file ' + op.src.path + '/' + op.src.name +
+                                  ' -> ' + op.src.remote + ':' + op.src.remote_path)
                 self.copy(op.src.path + '/' + op.src.name, op.src.remote_path, op.src.remote)
             if op.operation == operation.Operation.REMOVE:
-                self.delete_file(op.src.path, op.src.remote)
+                common.print_line('removing ' + op.src.remote+op.src.path)
+                if op.src.is_dir:
+                    try:
+                        self.rmdir(op.src.path, op.src.remote)
+                    except Exception as e:
+                        logging.debug(str(e))
+                else:
+                    self.delete_file(op.src.path, op.src.remote)
 
     def restore_old(self, remote_path, local_dir):
         logging.debug('restoring directory ' + local_dir + ' from ' + remote_path)
@@ -307,8 +316,9 @@ class ClSync:
             self.copy_new(remote+remote_path, local_dir, True)
 
 
-    def rmdir(self, directory):
-        logging.debug('removing directory ' + directory)
+    def rmdir(self, directory, remote):
+        logging.debug('removing directory ' + remote+directory)
+        self._rclone.rmdir(remote, directory)
 
     def get_version(self):
         logging.debug('getting version')
@@ -320,8 +330,9 @@ class ClSync:
         logging.debug('deleting file ' + remote+file)
         self._rclone.delete_file(remote, file)
 
-    def delete(self, path):
-        logging.debug('deleting path ' + path)
+    def delete(self, path, remote):
+        logging.debug('deleting path ' + remote+path)
+        self._rclone.delete(remote, path)
 
     def copy(self, src, dst, remote):
         logging.debug('copy ' + src + ' to ' + remote + dst)
