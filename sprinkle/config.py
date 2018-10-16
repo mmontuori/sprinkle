@@ -4,7 +4,7 @@ config.py: configuration module responsible for loading configuration and rules
 """
 __author__ = "Michael Montuori [michael.montuori@gmail.com]"
 __copyright__ = "Copyright 2018, Michael Montuori. All rights reserved."
-__credits__ = ["", "", "", ""]
+__credits__ = ["Warren Crigger"]
 __version__ = "1.0"
 __revision__ = "1"
 __maintainer__ = "Michael Montuori [michael.montuori@gmail.com]"

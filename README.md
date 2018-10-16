@@ -54,4 +54,4 @@ This project is licensed under the GPLv3 License - see the
 
 ## Acknowledgments
 
-* ...
+* Warren Crigger for development support

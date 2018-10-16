@@ -4,7 +4,7 @@ rclone wrapper module
 """
 __author__ = "Michael Montuori [michael.montuori@gmail.com]"
 __copyright__ = "Copyright 2017 Michael Montuori. All rights reserved."
-__credits__ = []
+__credits__ = ["Warren Crigger"]
 __license__ = "closed"
 __version__ = "0.1"
 __revision__ = "2"
