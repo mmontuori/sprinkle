@@ -38,7 +38,7 @@ def normalize_path(path):
     return path.replace('\\', '/')
 
 
-def execute(command_with_args):
+def execute(command_with_args, no_error=False):
     logging.debug("Invoking : %s", " ".join(command_with_args))
     try:
         with subprocess.Popen(
@@ -48,7 +48,7 @@ def execute(command_with_args):
             (out, err) = proc.communicate()
 
             logging.debug(out)
-            if err:
+            if err and no_error is False:
                 logging.warning(err.decode("utf-8").replace("\\n", "\n"))
 
             return {

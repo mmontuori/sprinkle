@@ -19,10 +19,11 @@ import sys
 
 
 def usage():
-    print("usage: sprinkle.py [-v] [-h] {-c|--conf <config file>} {command=None} {arg...arg}")
+    print("usage: sprinkle.py [-d|--debug] [-v|--version] [-h|--help] {-c|--conf <config file>} {command=None} {arg...arg}")
     print("       -h = help")
     print("       -c = configuration file")
     print("       -v = print version")
+    print("       -d = debug output")
     print("commands:")
     print("       ls = list files")
     print("   backup = backup files to clustered drives")
@@ -54,9 +55,12 @@ def read_args(argv):
     global __configfile
     global __dirtosync
     global __args
+    global __cmd_debug
+
+    __cmd_debug = False
 
     try:
-        opts, args = getopt.getopt(argv, "vhc:", ["help", "conf="])
+        opts, args = getopt.getopt(argv, "dvhc:", ["help", "conf=", "debug", "version"])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -70,6 +74,8 @@ def read_args(argv):
             sys.exit(0)
         elif opt in ("-c", "--configfile"):
             __configfile = arg
+        elif opt in ("-d", "--debug"):
+            __cmd_debug = True
 
     if len(args) < 1:
         usage()
@@ -97,7 +103,7 @@ def init_logging(debug):
 
 def ls():
     cl_sync = clsync.ClSync(__config)
-    common.print_line('file list:')
+    common.print_line('retrieving file list...')
     if len(__args) == 1:
         logging.error('invalid ls command')
         usage_ls()
@@ -108,6 +114,19 @@ def ls():
         filename_length = len(files[tmp_file].path)
         if not files[tmp_file].is_dir and filename_length > largest_length:
             largest_length = filename_length
+    common.print_line('---' + " " +
+                      'NAME'.ljust(largest_length) + " " +
+                      'SIZE'.rjust(9) + " " +
+                      'MOD TIME'.ljust(25) + " " +
+                      'REMOTE'
+                      )
+    common.print_line('---' + " " +
+                      ''.join('-' for i in range(largest_length)) + " " +
+                      ''.join('-' for i in range(9)) + " " +
+                      ''.join('-' for i in range(25)) + " " +
+                      ''.join('-' for i in range(15))
+                      )
+
     for tmp_file in files:
         if files[tmp_file].is_dir is True:
             first_chars = '-d-'
@@ -119,7 +138,7 @@ def ls():
         common.print_line(first_chars + " " +
                           file_name.ljust(largest_length) + " " +
                           str(files[tmp_file].size).rjust(9) + " " +
-                          files[tmp_file].mod_time + " " +
+                          files[tmp_file].mod_time.ljust(25) + " " +
                           files[tmp_file].remote
                           )
 
@@ -151,7 +170,10 @@ def main(argv):
     logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
     read_args(argv)
     read_config(__configfile)
-    init_logging(__config['debug'])
+    if __cmd_debug is True:
+        init_logging('true')
+    else:
+        init_logging(__config['debug'])
     logging.debug('config: ' + str(__config))
 
     common.print_line('Sprinkle Utility')

@@ -73,7 +73,7 @@ class ClSync:
         for remote in self.get_remotes():
             logging.debug('getting lsjson from ' + remote + file)
             try:
-                json_out = self._rclone.lsjson(remote, file, ['--recursive'])
+                json_out = self._rclone.lsjson(remote, file, ['--recursive'], True)
             except exceptions.FileNotFoundException as e:
                 json_out = '[]'
             tmp_json = json.loads(json_out)
@@ -239,6 +239,8 @@ class ClSync:
             if op.operation == operation.Operation.ADD:
                 best_remote = self.get_best_remote(int(op.src.size))
                 logging.debug('best remote: ' + best_remote)
+                common.print_line('backing up file ' + op.src.path+'/'+op.src.name +
+                                  ' -> ' + best_remote+':'+op.src.remote_path)
                 self.copy(op.src.path+'/'+op.src.name, op.src.remote_path, best_remote)
             if op.operation == operation.Operation.UPDATE:
                 best_remote = self.get_best_remote(int(op.src.size))
