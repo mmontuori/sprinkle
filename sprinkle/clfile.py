@@ -5,7 +5,7 @@ container class for a file
 __author__ = "Michael Montuori [michael.montuori@gmail.com]"
 __copyright__ = "Copyright 2017 Michael Montuori. All rights reserved."
 __credits__ = ["Warren Crigger"]
-__license__ = "closed"
+__license__ = "GPLv3"
 __version__ = "1.0"
 __revision__ = "1"
 
