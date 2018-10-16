@@ -195,7 +195,7 @@ class RClone:
         logging.debug('returning ' + str(out))
         return out
 
-    def copy(self, src, dst, extra_args=[]):
+    def copy(self, src, dst, extra_args=[], no_error=False):
         logging.debug('running copy from ' + src + " to " + dst)
         command_with_args = []
         command_with_args.append(self._rclone_exe)
@@ -208,11 +208,12 @@ class RClone:
         command_with_args.append(src)
         command_with_args.append(dst)
         logging.debug('command args: ' + str(command_with_args))
-        result = common.execute(command_with_args)
+        result = common.execute(command_with_args, no_error)
         logging.debug('result: ' + str(result))
         if result['error'] is not '':
-            logging.error('error getting remotes objects')
-            raise Exception('error getting remote object. ' + result['error'])
+            if no_error is False:
+                logging.error('error getting remotes objects')
+                raise Exception('error getting remote object. ' + result['error'])
         out = result['out'].splitlines()
         logging.debug('returning ' + str(out))
         return out

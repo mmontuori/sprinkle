@@ -304,8 +304,8 @@ class ClSync:
         for remote in self.get_remotes():
             common.print_line('restoring file ' + remote+remote_path + ' -> ' + local_dir)
             logging.debug('restoring file ' + remote+remote_path + ' -> ' + local_dir)
-            self.copy_new(remote+remote_path, local_dir)
-            
+            self.copy_new(remote+remote_path, local_dir, True)
+
 
     def rmdir(self, directory):
         logging.debug('removing directory ' + directory)
@@ -327,9 +327,9 @@ class ClSync:
         logging.debug('copy ' + src + ' to ' + remote + dst)
         self._rclone.copy(src, remote+dst)
 
-    def copy_new(self, src, dst):
+    def copy_new(self, src, dst, no_error=False):
         logging.debug('copy ' + src + ' to ' + dst)
-        self._rclone.copy(src, dst)
+        self._rclone.copy(src, dst, [], no_error)
 
     def move(self, src, dst):
         logging.debug('move ' + src + ' to ' + dst)
