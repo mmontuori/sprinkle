@@ -19,15 +19,20 @@ import sys
 
 
 def usage():
-    print("usage: sprinkle.py [-d|--debug] [-v|--version] [-h|--help] {-c|--conf <config file>} {command=None} {arg...arg}")
-    print("       -h = help")
-    print("       -c = configuration file")
-    print("       -v = print version")
-    print("       -d = debug output")
-    print("commands:")
-    print("       ls = list files")
-    print("   backup = backup files to clustered drives")
-    print("  restore = restore files from clustered drives")
+    print("usage: sprinkle.py [options} {command=None} {arg...arg}")
+    print("  options:")
+    print("    -h|--help     = help")
+    print("    -c|--conf     = configuration file")
+    print("    -v|--version  = print version")
+    print("    -d|--debug    = debug output")
+    print("    --dist-type   = distribution type (defaults:mas)")
+    print("    --comp-method = compare method (defaults:size)")
+    print("    --rclone-exe = rclone executable (defaults:rclone)")
+    print("    --rclone-conf = rclone configuration (defaults:None)")
+    print("  commands:")
+    print("         ls = list files")
+    print("     backup = backup files to clustered drives")
+    print("    restore = restore files from clustered drives")
 
 
 def usage_ls():
@@ -56,11 +61,28 @@ def read_args(argv):
     global __dirtosync
     global __args
     global __cmd_debug
+    global __dist_type
+    global __comp_method
+    global __rclone_exe
+    global __rclone_conf
 
+    __configfile = None
     __cmd_debug = False
+    __dist_type = None
+    __comp_method = None
+    __rclone_exe = None
+    __rclone_conf = None
 
     try:
-        opts, args = getopt.getopt(argv, "dvhc:", ["help", "conf=", "debug", "version"])
+        opts, args = getopt.getopt(argv, "dvhc:",
+                                   ["help",
+                                    "conf=",
+                                    "debug",
+                                    "version",
+                                    "dist-type=",
+                                    "comp-method=",
+                                    "rclone-exe=",
+                                    "rclone-conf="])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -76,6 +98,14 @@ def read_args(argv):
             __configfile = arg
         elif opt in ("-d", "--debug"):
             __cmd_debug = True
+        elif opt in ("--dist-type"):
+            __dist_type = arg
+        elif opt in ("--comp-method"):
+            __comp_method = arg
+        elif opt in ("--rclone-exe"):
+            __rclone_exe = arg
+        elif opt in ("--rclone-conf"):
+            __rclone_conf = arg
 
     if len(args) < 1:
         usage()
@@ -83,15 +113,14 @@ def read_args(argv):
 
     __args = args
 
-    if __configfile == None or __configfile == '':
-        usage()
-        sys.exit(2)
-
 
 def read_config(config_file):
     global __config
-    conf = config.Config(config_file)
-    __config = conf.get_config()
+    if config_file is not None:
+        conf = config.Config(config_file)
+        __config = conf.get_config()
+    else:
+        __config = {}
 
 
 def init_logging(debug):
@@ -172,8 +201,16 @@ def main(argv):
     read_config(__configfile)
     if __cmd_debug is True:
         init_logging('true')
-    else:
+    elif 'debug' in __config:
         init_logging(__config['debug'])
+    if __dist_type is not None:
+        __config['distribution_type'] = __dist_type
+    if __comp_method is not None:
+        __config['compare_method'] = __comp_method
+    if __rclone_exe is not None:
+        __config['rclone_exe'] = __rclone_exe
+    if __rclone_conf is not None:
+        __config['rclone_config'] = __rclone_conf
     logging.debug('config: ' + str(__config))
 
     common.print_line('Sprinkle Utility')
