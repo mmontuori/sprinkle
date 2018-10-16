@@ -49,6 +49,8 @@ class ClSync:
             self._compare_method = 'size'
         self._remotes = None
         self._remote_calls = 0
+        self._sizes = None
+        self._frees = None
 
     def get_remotes(self):
         logging.debug('getting rclone remotes')
@@ -93,20 +95,46 @@ class ClSync:
                 #logging.debug('json_ret: ' + json_ret)
         return files
 
+    def get_sizes(self):
+        logging.debug('getting sizes')
+        if self._sizes is None:
+            self._sizes = {}
+            for remote in self.get_remotes():
+                size = self._rclone.get_size(remote)
+                logging.debug('size of ' + remote + ' is ' + str(size))
+                self._sizes[remote] = size
+        return self._sizes
+
     def get_size(self):
-        logging.debug('getting total size')
+        logging.debug('getting sizes')
         total_size = 0
         for remote in self.get_remotes():
-            size = self._rclone.get_size(remote)
+            if self._sizes is None:
+                size = self._rclone.get_size(remote)
+            else:
+                size = self._sizes[remote]
             logging.debug('size of ' + remote + ' is ' + str(size))
             total_size += size
         return total_size
+
+    def get_frees(self):
+        logging.debug('getting free sizes')
+        if self._frees is None:
+            self._frees = {}
+            for remote in self.get_remotes():
+                size = self._rclone.get_free(remote)
+                logging.debug('free of ' + remote + ' is ' + str(size))
+                self._frees[remote] = size
+        return self._frees
 
     def get_free(self):
         logging.debug('getting total free size')
         total_size = 0
         for remote in self.get_remotes():
-            size = self._rclone.get_free(remote)
+            if self._frees is None:
+                size = self._rclone.get_free(remote)
+            else:
+                size = self._frees[remote]
             logging.debug('free of ' + remote + ' is ' + str(size))
             total_size += size
         return total_size

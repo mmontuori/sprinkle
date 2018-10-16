@@ -33,6 +33,7 @@ def usage():
     print("         ls = list files")
     print("     backup = backup files to clustered drives")
     print("    restore = restore files from clustered drives")
+    print("      stats = display volume statistics")
 
 
 def usage_ls():
@@ -47,6 +48,11 @@ def usage_backup():
 
 def usage_restore():
     print("usage: sprinkle.py {-c|--conf <config file>} restore {remote dir} {local dir}")
+    print("*** TO BE FINISHED ***")
+
+
+def usage_stats():
+    print("usage: sprinkle.py {-c|--conf <config file>} stats [volume]")
     print("*** TO BE FINISHED ***")
 
 
@@ -74,7 +80,7 @@ def read_args(argv):
     __rclone_conf = None
 
     try:
-        opts, args = getopt.getopt(argv, "dvhc:",
+        opts, args = getopt.getopt(argv, "dvhc:s:",
                                    ["help",
                                     "conf=",
                                     "debug",
@@ -82,7 +88,8 @@ def read_args(argv):
                                     "dist-type=",
                                     "comp-method=",
                                     "rclone-exe=",
-                                    "rclone-conf="])
+                                    "rclone-conf=",
+                                    "stats="])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -106,6 +113,7 @@ def read_args(argv):
             __rclone_exe = arg
         elif opt in ("--rclone-conf"):
             __rclone_conf = arg
+
 
     if len(args) < 1:
         usage()
@@ -195,6 +203,47 @@ def restore():
     cl_sync.restore(local_dir, remote_path)
 
 
+def stats():
+    logging.debug('display stats about the volumes')
+    common.print_line('calculating total and free space...')
+    cl_sync = clsync.ClSync(__config)
+    common.print_line('REMOTE'.ljust(15) + " " +
+                      'SIZE'.rjust(20) + " " +
+                      'FREE'.rjust(20) + " " +
+                      '%FREE'.rjust(10)
+                      )
+    common.print_line(''.join('=' for i in range(15)) + " " +
+                      ''.join('=' for i in range(20)) + " " +
+                      ''.join('=' for i in range(20)) + " " +
+                      ''.join('=' for i in range(10))
+                      )
+    sizes = cl_sync.get_sizes()
+    frees = cl_sync.get_frees()
+    for remote in sizes:
+        percent_use = frees[remote] * 100 / sizes[remote]
+        common.print_line(remote.ljust(15) + " " +
+                          "{:,}".format(sizes[remote]).rjust(20) + " " +
+                          "{:,}".format(frees[remote]).rjust(20) + " " +
+                          "{:,}".format(int(percent_use)).rjust(10)
+                          )
+
+    size = cl_sync.get_size()
+    free = cl_sync.get_free()
+    logging.debug('size: ' + "{:,}".format(size))
+    logging.debug('free: ' + "{:,}".format(free))
+    percent_use = free * 100 / size
+    common.print_line(''.join('-' for i in range(15)) + " " +
+                      ''.join('-' for i in range(20)) + " " +
+                      ''.join('-' for i in range(20)) + " " +
+                      ''.join('-' for i in range(10))
+                      )
+    common.print_line("total:".ljust(15) + " " +
+                      "{:,}".format(size).rjust(20) + " " +
+                      "{:,}".format(free).rjust(20) + " " +
+                      "{:,}".format(int(percent_use)).rjust(10)
+                      )
+
+
 def main(argv):
     logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
     read_args(argv)
@@ -221,6 +270,8 @@ def main(argv):
         backup()
     elif __args[0] == 'restore':
         restore()
+    elif __args[0] == 'stats':
+        stats()
     else:
         logging.error('invalid command')
         usage()
