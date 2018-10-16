@@ -80,3 +80,15 @@ def remove_ending_slash(path):
         return path[0:len(path)-1]
     else:
         return path
+
+
+def convert_unit(amount, unit):
+    if unit == 'G':
+        return int(amount / 1024 / 1024 / 1024)
+    if unit == 'M':
+        return int(amount / 1024 / 1024)
+    if unit == 'K':
+        return int(amount / 1024)
+    if unit == 'B':
+        return amount
+

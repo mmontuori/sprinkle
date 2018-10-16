@@ -29,6 +29,7 @@ def usage():
     print("    --comp-method = compare method (defaults:size)")
     print("    --rclone-exe = rclone executable (defaults:rclone)")
     print("    --rclone-conf = rclone configuration (defaults:None)")
+    print("   --display_unit = display unit [G|M|K|B]")
     print("  commands:")
     print("         ls = list files")
     print("     backup = backup files to clustered drives")
@@ -71,6 +72,7 @@ def read_args(argv):
     global __comp_method
     global __rclone_exe
     global __rclone_conf
+    global __display_unit
 
     __configfile = None
     __cmd_debug = False
@@ -78,6 +80,7 @@ def read_args(argv):
     __comp_method = None
     __rclone_exe = None
     __rclone_conf = None
+    __display_unit = 'G'
 
     try:
         opts, args = getopt.getopt(argv, "dvhc:s:",
@@ -89,7 +92,8 @@ def read_args(argv):
                                     "comp-method=",
                                     "rclone-exe=",
                                     "rclone-conf=",
-                                    "stats="])
+                                    "stats=",
+                                    "display-unit="])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -113,6 +117,10 @@ def read_args(argv):
             __rclone_exe = arg
         elif opt in ("--rclone-conf"):
             __rclone_conf = arg
+        elif opt in ("--display-unit"):
+            if arg != 'G' and arg != 'M' and arg != 'K' and arg != 'B':
+                logging.error('invalid UNIT ' + arg + ', only [G|M|K|B] accepted')
+            __display_unit = arg
 
 
     if len(args) < 1:
@@ -221,9 +229,11 @@ def stats():
     frees = cl_sync.get_frees()
     for remote in sizes:
         percent_use = frees[remote] * 100 / sizes[remote]
+        size_d = common.convert_unit(sizes[remote], __display_unit)
+        free_d = common.convert_unit(frees[remote], __display_unit)
         common.print_line(remote.ljust(15) + " " +
-                          "{:,}".format(sizes[remote]).rjust(20) + " " +
-                          "{:,}".format(frees[remote]).rjust(20) + " " +
+                          "{:,}".format(size_d).rjust(19) + __display_unit + " " +
+                          "{:,}".format(free_d).rjust(19) + __display_unit + " " +
                           "{:,}".format(int(percent_use)).rjust(10)
                           )
 
@@ -237,9 +247,11 @@ def stats():
                       ''.join('-' for i in range(20)) + " " +
                       ''.join('-' for i in range(10))
                       )
+    size_d = common.convert_unit(size, __display_unit)
+    free_d = common.convert_unit(free, __display_unit)
     common.print_line("total:".ljust(15) + " " +
-                      "{:,}".format(size).rjust(20) + " " +
-                      "{:,}".format(free).rjust(20) + " " +
+                      "{:,}".format(size_d).rjust(19) + __display_unit + " " +
+                      "{:,}".format(free_d).rjust(19) + __display_unit + " " +
                       "{:,}".format(int(percent_use)).rjust(10)
                       )
 
