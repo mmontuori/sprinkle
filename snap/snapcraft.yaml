@@ -1,0 +1,20 @@
+name: sprinkle
+version: 1.0
+summary: Sprinkle
+grade: devel
+description: >
+  Sprinkle is a volume clustering utility based on [RClone](https://rclone.org). It presents all the
+  RClone available volumes as a single clustered volume. It supports 1-way sync mainly for
+  backup and recovery.
+
+confinement: strict
+
+parts:
+  sprinkle:
+    plugin: python
+    python-version: python3
+    source: .
+
+apps:
+  sprinkle:
+    command: python3 sprinkle.py
