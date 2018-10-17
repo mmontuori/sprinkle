@@ -23,7 +23,7 @@ def read(name):
         return f.read()
 
 setup(
-    name='sprinkle',
+    name='sprinkle-py',
     version='0.1.1',
     packages=find_packages(exclude=['contrib', 'docs', 'tests']),
     #packages=['sprinkle'],
