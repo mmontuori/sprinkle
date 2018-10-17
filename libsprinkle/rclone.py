@@ -11,8 +11,8 @@ __revision__ = "2"
 
 import logging
 import json
-from sprinkle import common
-from sprinkle import exceptions
+from libsprinkle import common
+from libsprinkle import exceptions
 
 class RClone:
 
@@ -23,7 +23,7 @@ class RClone:
             raise Exception("Configuration file " + str(config_file) + " not found")
         if rclone_exe is not "rclone" and not common.is_file(rclone_exe):
             logging.error("rclone executable " + str(rclone_exe) + " not found. Cannot continue!")
-            common.print_line('RCLONE.EXE not in PATH. Put it in PATH or modify sprinkle.conf to point to it.')
+            common.print_line('RCLONE.EXE not in PATH. Put it in PATH or modify libsprinkle.conf to point to it.')
             raise Exception("rclone executable " + str(rclone_exe) + " not found")
         self._config_file = config_file
         self._rclone_exe = rclone_exe

@@ -33,7 +33,7 @@ setup(
     include_package_data=True,
     author='mmontuori',
     author_email='michael.montuori@gmail.com',
-    description='Sprinkle and backup files in the cloud across multiple storage',
+    description='Sprinkle is a volume clustering utility based on [RClone](https://rclone.org).',
     long_description=long_description,
     keywords='sprinkle cloud backup restore',
     zip_safe=True,

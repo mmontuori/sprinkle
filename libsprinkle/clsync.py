@@ -10,11 +10,11 @@ __version__ = "0.1"
 __revision__ = "2"
 
 import logging
-from sprinkle import rclone
-from sprinkle import common
-from sprinkle import clfile
-from sprinkle import exceptions
-from sprinkle import operation
+from libsprinkle import rclone
+from libsprinkle import common
+from libsprinkle import clfile
+from libsprinkle import exceptions
+from libsprinkle import operation
 import json
 import os
 

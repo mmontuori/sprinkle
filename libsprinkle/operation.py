@@ -9,7 +9,7 @@ __license__ = "GPLv3"
 __version__ = "0.1"
 __revision__ = "2"
 
-from sprinkle import clfile
+from libsprinkle import clfile
 
 class Operation(object):
 

@@ -1,13 +1,13 @@
 name: sprinkle
 version: 1.0
 summary: Sprinkle
-grade: devel
+grade: stable
 description: >
   Sprinkle is a volume clustering utility based on [RClone](https://rclone.org). It presents all the
   RClone available volumes as a single clustered volume. It supports 1-way sync mainly for
   backup and recovery.
 
-confinement: devmode
+confinement: classic
 
 parts:
   sprinkle:
@@ -17,8 +17,4 @@ parts:
 
 apps:
   sprinkle:
-    environment:
-       PYTHONPATH: $SNAP/lib/python3.5/site-packages:$PYTHONPATH
-       LD_LIBRARY_PATH: $SNAP/usr/lib:$SNAP/lib:$SNAP/usr/lib/lib-arch:$SNAP/lib/lib-arch
-       PATH: $SNAP/usr/bin:$SNAP/bin:$SNAP/sbin:$PATH
-    command: python3 $SNAP/bin/sprinkle.py
+    command: sprinkle.py
