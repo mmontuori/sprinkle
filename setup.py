@@ -25,9 +25,9 @@ def read(name):
 setup(
     name='sprinkle',
     version='0.1.1',
-    #packages=find_packages(exclude=['contrib', 'docs', 'tests']),
-    packages=['sprinkle'],
-    install_requires=read('requirements.txt'),
+    packages=find_packages(exclude=['contrib', 'docs', 'tests']),
+    #packages=['sprinkle'],
+    #install_requires=read('requirements.txt'),
     url='https://gitlab.com/mmontuori/sprinkle',
     license='GPLv3',
     include_package_data=True,

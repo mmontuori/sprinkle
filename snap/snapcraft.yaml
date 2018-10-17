@@ -7,7 +7,7 @@ description: >
   RClone available volumes as a single clustered volume. It supports 1-way sync mainly for
   backup and recovery.
 
-confinement: strict
+confinement: devmode
 
 parts:
   sprinkle:
@@ -17,4 +17,8 @@ parts:
 
 apps:
   sprinkle:
-    command: python3 sprinkle.py
+    environment:
+       PYTHONPATH: $SNAP/lib/python3.5/site-packages:$PYTHONPATH
+       LD_LIBRARY_PATH: $SNAP/usr/lib:$SNAP/lib:$SNAP/usr/lib/lib-arch:$SNAP/lib/lib-arch
+       PATH: $SNAP/usr/bin:$SNAP/bin:$SNAP/sbin:$PATH
+    command: python3 $SNAP/bin/sprinkle.py
