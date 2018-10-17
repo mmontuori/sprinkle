@@ -7,7 +7,7 @@ description: >
   RClone available volumes as a single clustered volume. It supports 1-way sync mainly for
   backup and recovery.
 
-confinement: classic
+confinement: strict
 
 parts:
   sprinkle:
