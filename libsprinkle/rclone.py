@@ -16,7 +16,7 @@ from libsprinkle import exceptions
 
 class RClone:
 
-    def __init__(self, config_file=None, rclone_exe="rclone"):
+    def __init__(self, config_file=None, rclone_exe="rclone", rclone_retries="1"):
         logging.debug('constructing RClone')
         if config_file is not None and not common.is_file(config_file):
             logging.error("configuration file " + str(config_file) + " not found. Cannot continue!")
@@ -27,6 +27,7 @@ class RClone:
             raise Exception("rclone executable " + str(rclone_exe) + " not found")
         self._config_file = config_file
         self._rclone_exe = rclone_exe
+        self._rclone_retries = rclone_retries
 
     def get_remotes(self, extra_args=[]):
         logging.debug('listing remotes')
@@ -38,6 +39,8 @@ class RClone:
         if self._config_file is not None:
             command_with_args.append("--config")
             command_with_args.append(self._config_file)
+        command_with_args.append("--retries")
+        command_with_args.append(self._rclone_retries)
         result = common.execute(command_with_args)
         logging.debug('result: ' + str(result))
         if result['code'] == -20:
@@ -60,6 +63,8 @@ class RClone:
         if self._config_file is not None:
             command_with_args.append("--config")
             command_with_args.append(self._config_file)
+        command_with_args.append("--retries")
+        command_with_args.append(self._rclone_retries)
         command_with_args.append(remote+directory)
         result = common.execute(command_with_args, no_error)
         logging.debug('result: ' + str(result))
@@ -83,6 +88,8 @@ class RClone:
         if self._config_file is not None:
             command_with_args.append("--config")
             command_with_args.append(self._config_file)
+        command_with_args.append("--retries")
+        command_with_args.append(self._rclone_retries)
         command_with_args.append(remote)
         result = common.execute(command_with_args)
         logging.debug('result: ' + str(result))
@@ -101,6 +108,8 @@ class RClone:
         if self._config_file is not None:
             command_with_args.append("--config")
             command_with_args.append(self._config_file)
+        command_with_args.append("--retries")
+        command_with_args.append(self._rclone_retries)
         command_with_args.append(remote + directory)
         result = common.execute(command_with_args)
         logging.debug('result: ' + str(result))
@@ -119,6 +128,8 @@ class RClone:
         if self._config_file is not None:
             command_with_args.append("--config")
             command_with_args.append(self._config_file)
+        command_with_args.append("--retries")
+        command_with_args.append(self._rclone_retries)
         command_with_args.append(remote + directory)
         result = common.execute(command_with_args)
         logging.debug('result: ' + str(result))
@@ -149,6 +160,8 @@ class RClone:
         if self._config_file is not None:
             command_with_args.append("--config")
             command_with_args.append(self._config_file)
+        command_with_args.append("--retries")
+        command_with_args.append(self._rclone_retries)
         command_with_args.append(remote + file)
         result = common.execute(command_with_args)
         logging.debug('result: ' + str(result))
@@ -167,6 +180,8 @@ class RClone:
         if self._config_file is not None:
             command_with_args.append("--config")
             command_with_args.append(self._config_file)
+        command_with_args.append("--retries")
+        command_with_args.append(self._rclone_retries)
         command_with_args.append(remote + file)
         result = common.execute(command_with_args)
         logging.debug('result: ' + str(result))
@@ -185,6 +200,8 @@ class RClone:
         if self._config_file is not None:
             command_with_args.append("--config")
             command_with_args.append(self._config_file)
+        command_with_args.append("--retries")
+        command_with_args.append(self._rclone_retries)
         command_with_args.append(remote + file)
         result = common.execute(command_with_args)
         logging.debug('result: ' + str(result))
@@ -205,6 +222,8 @@ class RClone:
         if self._config_file is not None:
             command_with_args.append("--config")
             command_with_args.append(self._config_file)
+        command_with_args.append("--retries")
+        command_with_args.append(self._rclone_retries)
         command_with_args.append(src)
         command_with_args.append(dst)
         logging.debug('command args: ' + str(command_with_args))
@@ -228,6 +247,8 @@ class RClone:
         if self._config_file is not None:
             command_with_args.append("--config")
             command_with_args.append(self._config_file)
+        command_with_args.append("--retries")
+        command_with_args.append(self._rclone_retries)
         command_with_args.append(src)
         command_with_args.append(dst)
         result = common.execute(command_with_args)
@@ -248,6 +269,8 @@ class RClone:
         if self._config_file is not None:
             command_with_args.append("--config")
             command_with_args.append(self._config_file)
+        command_with_args.append("--retries")
+        command_with_args.append(self._rclone_retries)
         command_with_args.append(remote)
         result = common.execute(command_with_args)
         logging.debug('result: ' + str(result))
@@ -268,6 +291,8 @@ class RClone:
         if self._config_file is not None:
             command_with_args.append("--config")
             command_with_args.append(self._config_file)
+        command_with_args.append("--retries")
+        command_with_args.append(self._rclone_retries)
         command_with_args.append(remote)
         result = common.execute(command_with_args)
         logging.debug('result: ' + str(result))
@@ -289,6 +314,8 @@ class RClone:
         if self._config_file is not None:
             command_with_args.append("--config")
             command_with_args.append(self._config_file, src, dst)
+        command_with_args.append("--retries")
+        command_with_args.append(self._rclone_retries)
         result = common.execute(command_with_args)
         logging.debug('result: ' + str(result))
         if result['error'] is not '':

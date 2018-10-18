@@ -47,6 +47,10 @@ class ClSync:
             self._compare_method = config['compare_method']
         else:
             self._compare_method = 'size'
+        if 'rclone_retries' not in config:
+            self._rclone_retries = 1
+        else:
+            self._rclone_retries = config['rclone_retries']
         self._remotes = None
         self._remote_calls = 0
         self._sizes = None

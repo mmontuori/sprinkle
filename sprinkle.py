@@ -27,9 +27,10 @@ def usage():
     print("    -d|--debug    = debug output")
     print("    --dist-type   = distribution type (defaults:mas)")
     print("    --comp-method = compare method (defaults:size)")
-    print("    --rclone-exe = rclone executable (defaults:rclone)")
+    print("     --rclone-exe = rclone executable (defaults:rclone)")
     print("    --rclone-conf = rclone configuration (defaults:None)")
     print("   --display_unit = display unit [G|M|K|B]")
+    print("        --retries = number of retries (default:1)")
     print("  commands:")
     print("         ls = list files")
     print("     backup = backup files to clustered drives")
@@ -73,6 +74,7 @@ def read_args(argv):
     global __rclone_exe
     global __rclone_conf
     global __display_unit
+    global __rclone_retries
 
     __configfile = None
     __cmd_debug = False
@@ -81,6 +83,7 @@ def read_args(argv):
     __rclone_exe = None
     __rclone_conf = None
     __display_unit = 'G'
+    __rclone_retries = 1
 
     try:
         opts, args = getopt.getopt(argv, "dvhc:s:",
@@ -93,7 +96,8 @@ def read_args(argv):
                                     "rclone-exe=",
                                     "rclone-conf=",
                                     "stats=",
-                                    "display-unit="])
+                                    "display-unit=",
+                                    "retries"])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -121,6 +125,8 @@ def read_args(argv):
             if arg != 'G' and arg != 'M' and arg != 'K' and arg != 'B':
                 logging.error('invalid UNIT ' + arg + ', only [G|M|K|B] accepted')
             __display_unit = arg
+        elif opt in ("--retries"):
+            __rclone_retries = int(arg)
 
 
     if len(args) < 1:
@@ -137,6 +143,22 @@ def read_config(config_file):
         __config = conf.get_config()
     else:
         __config = {}
+
+
+def override_config():
+    if __cmd_debug is True:
+        init_logging('true')
+    elif 'debug' in __config:
+        init_logging(__config['debug'])
+    if __dist_type is not None:
+        __config['distribution_type'] = __dist_type
+    if __comp_method is not None:
+        __config['compare_method'] = __comp_method
+    if __rclone_exe is not None:
+        __config['rclone_exe'] = __rclone_exe
+    if __rclone_conf is not None:
+        __config['rclone_config'] = __rclone_conf
+    __config['rclone_retries'] = str(__rclone_retries)
 
 
 def init_logging(debug):
@@ -260,18 +282,7 @@ def main(argv):
     logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
     read_args(argv)
     read_config(__configfile)
-    if __cmd_debug is True:
-        init_logging('true')
-    elif 'debug' in __config:
-        init_logging(__config['debug'])
-    if __dist_type is not None:
-        __config['distribution_type'] = __dist_type
-    if __comp_method is not None:
-        __config['compare_method'] = __comp_method
-    if __rclone_exe is not None:
-        __config['rclone_exe'] = __rclone_exe
-    if __rclone_conf is not None:
-        __config['rclone_config'] = __rclone_conf
+    override_config()
     logging.debug('config: ' + str(__config))
 
     common.print_line('Sprinkle Utility')
