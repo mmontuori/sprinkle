@@ -177,7 +177,11 @@ def ls():
         sys.exit(-1)
     files = cl_sync.ls(common.remove_ending_slash(__args[1]))
     largest_length = 25
-    for tmp_file in files:
+    keys = []
+    for key in files:
+        keys.append(key)
+    keys.sort()
+    for tmp_file in keys:
         filename_length = len(files[tmp_file].path)
         if not files[tmp_file].is_dir and filename_length > largest_length:
             largest_length = filename_length
