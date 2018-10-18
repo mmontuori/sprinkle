@@ -179,6 +179,7 @@ def ls():
     largest_length = 25
     keys = []
     for key in files:
+        logging.debug('appending for sort: ' + key)
         keys.append(key)
     keys.sort()
     for tmp_file in keys:
@@ -198,7 +199,7 @@ def ls():
                       ''.join('-' for i in range(15))
                       )
 
-    for tmp_file in files:
+    for tmp_file in keys:
         if files[tmp_file].is_dir is True:
             first_chars = '-d-'
         else:
