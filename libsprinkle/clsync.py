@@ -74,18 +74,19 @@ class ClSync:
         logging.debug('lsjson of file: ' + file)
         if not file.startswith('/'):
             file = '/' + file
-        json_ret = ''
         files = {}
         for remote in self.get_remotes():
             logging.debug('getting lsjson from ' + remote + file)
             try:
-                json_out = self._rclone.lsjson(remote, file, ['--recursive'], True)
+                json_out = self._rclone.lsjson(remote, file, ['--recursive', '--fast-list'], True)
             except exceptions.FileNotFoundException as e:
                 json_out = '[]'
+            logging.debug('loading json')
             tmp_json = json.loads(json_out)
+            logging.debug('json size: ' + str(len(tmp_json)))
+            logging.debug('json loaded')
             for tmp_json_file in tmp_json:
                 tmp_file = clfile.ClFile()
-                #logging.debug('path: ' + file + '/' + tmp_json_file['Path'])
                 tmp_file.remote = remote
                 tmp_file.path = file + '/' + tmp_json_file['Path']
                 tmp_file.name = tmp_json_file['Name']
@@ -95,8 +96,7 @@ class ClSync:
                 tmp_file.is_dir = tmp_json_file['IsDir']
                 tmp_file.id = tmp_json_file['ID']
                 files[file + '/' + tmp_json_file['Path']] = tmp_file
-                json_ret = json_ret + '||' + json_out
-                #logging.debug('json_ret: ' + json_ret)
+            logging.debug('end of clsync.ls()')
         return files
 
     def get_sizes(self):
