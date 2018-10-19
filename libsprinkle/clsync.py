@@ -83,7 +83,7 @@ class ClSync:
                 json_out = self._rclone.lsjson(remote, file, ['--recursive', '--fast-list'], True)
             except exceptions.FileNotFoundException as e:
                 json_out = '[]'
-            common.print_line('loading json: ' + str(json_out))
+            logging('loading json')
             tmp_json = json.loads(json_out)
             logging.debug('json size: ' + str(len(tmp_json)))
             logging.debug('json loaded')
