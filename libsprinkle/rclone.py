@@ -75,7 +75,10 @@ class RClone:
                     raise exceptions.FileNotFoundException(result['error'])
                 else:
                     raise Exception('error getting remote object. ' + result['error'])
-        lsjson = result['out']
+        if 'out' in result and result['out'] == '[\n':
+            lsjson = '[]'
+        else:
+            lsjson = result['out']
         logging.debug('returning ' + str(lsjson))
         return lsjson
 
