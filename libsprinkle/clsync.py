@@ -15,6 +15,7 @@ from libsprinkle import common
 from libsprinkle import clfile
 from libsprinkle import exceptions
 from libsprinkle import operation
+from progress.bar import Bar
 import json
 import os
 
@@ -55,6 +56,7 @@ class ClSync:
         self._remote_calls = 0
         self._sizes = None
         self._frees = None
+        self._show_progress = config['show-progress']
 
     def get_remotes(self):
         logging.debug('getting rclone remotes')
@@ -263,6 +265,8 @@ class ClSync:
         local_clfiles = self.index_local_dir(local_dir)
         remote_clfiles = self.ls(os.path.basename(local_dir))
         ops = self.compare_clfiles(local_dir, local_clfiles, remote_clfiles)
+        if self._show_progress:
+            bar = Bar('Progress', max=len(ops))
         for op in ops:
             logging.debug('operation: ' + op.operation + ", path: " + op.src.path)
             if op.src.is_dir and op.operation != operation.Operation.REMOVE:
@@ -289,6 +293,8 @@ class ClSync:
                         logging.debug(str(e))
                 else:
                     self.delete_file(op.src.path, op.src.remote)
+            bar.next()
+        bar.finish()
 
     def restore_old(self, remote_path, local_dir):
         logging.debug('restoring directory ' + local_dir + ' from ' + remote_path)

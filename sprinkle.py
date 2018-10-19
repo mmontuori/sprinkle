@@ -31,6 +31,7 @@ def usage():
     print("    --rclone-conf = rclone configuration (defaults:None)")
     print("   --display_unit = display unit [G|M|K|B]")
     print("        --retries = number of retries (default:1)")
+    print("  --show-progress = show progress")
     print("  commands:")
     print("         ls = list files")
     print("     backup = backup files to clustered drives")
@@ -75,6 +76,7 @@ def read_args(argv):
     global __rclone_conf
     global __display_unit
     global __rclone_retries
+    global __show_progress
 
     __configfile = None
     __cmd_debug = False
@@ -84,6 +86,7 @@ def read_args(argv):
     __rclone_conf = None
     __display_unit = 'G'
     __rclone_retries = 1
+    __show_progress = False
 
     try:
         opts, args = getopt.getopt(argv, "dvhc:s:",
@@ -97,7 +100,8 @@ def read_args(argv):
                                     "rclone-conf=",
                                     "stats=",
                                     "display-unit=",
-                                    "retries"])
+                                    "retries=",
+                                    "show-progress"])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -127,6 +131,8 @@ def read_args(argv):
             __display_unit = arg
         elif opt in ("--retries"):
             __rclone_retries = int(arg)
+        elif opt in ("--show-progress"):
+            __show_progress = True
 
 
     if len(args) < 1:
@@ -159,6 +165,7 @@ def override_config():
     if __rclone_conf is not None:
         __config['rclone_config'] = __rclone_conf
     __config['rclone_retries'] = str(__rclone_retries)
+    __config['show-progress'] = __show_progress
 
 
 def init_logging(debug):
