@@ -84,7 +84,6 @@ class ClSync:
             except exceptions.FileNotFoundException as e:
                 json_out = '[]'
             common.print_line('loading json: ' + str(json_out))
-            json_out = tmp_json[1, len(json_out)]
             tmp_json = json.loads(json_out)
             logging.debug('json size: ' + str(len(tmp_json)))
             logging.debug('json loaded')
