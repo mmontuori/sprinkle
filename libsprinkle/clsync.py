@@ -275,17 +275,20 @@ class ClSync:
             if op.operation == operation.Operation.ADD:
                 best_remote = self.get_best_remote(int(op.src.size))
                 logging.debug('best remote: ' + best_remote)
-                common.print_line('backing up file ' + op.src.path+'/'+op.src.name +
+                if not self._show_progress:
+                    common.print_line('backing up file ' + op.src.path+'/'+op.src.name +
                                   ' -> ' + best_remote+':'+op.src.remote_path)
                 self.copy(op.src.path+'/'+op.src.name, op.src.remote_path, best_remote)
             if op.operation == operation.Operation.UPDATE:
                 best_remote = self.get_best_remote(int(op.src.size))
                 logging.debug('best remote: ' + best_remote)
-                common.print_line('backing up file ' + op.src.path + '/' + op.src.name +
+                if not self._show_progress:
+                    common.print_line('backing up file ' + op.src.path + '/' + op.src.name +
                                   ' -> ' + op.src.remote + ':' + op.src.remote_path)
                 self.copy(op.src.path + '/' + op.src.name, op.src.remote_path, op.src.remote)
             if op.operation == operation.Operation.REMOVE:
-                common.print_line('removing ' + op.src.remote+op.src.path)
+                if not self._show_progress:
+                    common.print_line('removing ' + op.src.remote+op.src.path)
                 if op.src.is_dir:
                     try:
                         self.rmdir(op.src.path, op.src.remote)
