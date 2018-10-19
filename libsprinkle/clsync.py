@@ -83,7 +83,8 @@ class ClSync:
                 json_out = self._rclone.lsjson(remote, file, ['--recursive', '--fast-list'], True)
             except exceptions.FileNotFoundException as e:
                 json_out = '[]'
-            logging.debug('loading json')
+            common.print_line('loading json: ' + str(json_out))
+            json_out = tmp_json[1, len(json_out)]
             tmp_json = json.loads(json_out)
             logging.debug('json size: ' + str(len(tmp_json)))
             logging.debug('json loaded')
@@ -293,8 +294,10 @@ class ClSync:
                         logging.debug(str(e))
                 else:
                     self.delete_file(op.src.path, op.src.remote)
-            bar.next()
-        bar.finish()
+            if self._show_progress:
+                bar.next()
+        if self._show_progress:
+            bar.finish()
 
     def restore_old(self, remote_path, local_dir):
         logging.debug('restoring directory ' + local_dir + ' from ' + remote_path)
