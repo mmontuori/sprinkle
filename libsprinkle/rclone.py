@@ -39,6 +39,7 @@ class RClone:
         if self._config_file is not None:
             command_with_args.append("--config")
             command_with_args.append(self._config_file)
+        command_with_args.append("--auto-confirm")
         command_with_args.append("--retries")
         command_with_args.append(self._rclone_retries)
         result = common.execute(command_with_args)
@@ -63,6 +64,7 @@ class RClone:
         if self._config_file is not None:
             command_with_args.append("--config")
             command_with_args.append(self._config_file)
+        command_with_args.append("--auto-confirm")
         command_with_args.append("--retries")
         command_with_args.append(self._rclone_retries)
         command_with_args.append(remote+directory)
@@ -91,6 +93,7 @@ class RClone:
         if self._config_file is not None:
             command_with_args.append("--config")
             command_with_args.append(self._config_file)
+        command_with_args.append("--auto-confirm")
         command_with_args.append("--retries")
         command_with_args.append(self._rclone_retries)
         command_with_args.append(remote)
@@ -111,6 +114,7 @@ class RClone:
         if self._config_file is not None:
             command_with_args.append("--config")
             command_with_args.append(self._config_file)
+        command_with_args.append("--auto-confirm")
         command_with_args.append("--retries")
         command_with_args.append(self._rclone_retries)
         command_with_args.append(remote + directory)
@@ -131,6 +135,7 @@ class RClone:
         if self._config_file is not None:
             command_with_args.append("--config")
             command_with_args.append(self._config_file)
+        command_with_args.append("--auto-confirm")
         command_with_args.append("--retries")
         command_with_args.append(self._rclone_retries)
         command_with_args.append(remote + directory)
@@ -163,6 +168,7 @@ class RClone:
         if self._config_file is not None:
             command_with_args.append("--config")
             command_with_args.append(self._config_file)
+        command_with_args.append("--auto-confirm")
         command_with_args.append("--retries")
         command_with_args.append(self._rclone_retries)
         command_with_args.append(remote + file)
@@ -183,6 +189,7 @@ class RClone:
         if self._config_file is not None:
             command_with_args.append("--config")
             command_with_args.append(self._config_file)
+        command_with_args.append("--auto-confirm")
         command_with_args.append("--retries")
         command_with_args.append(self._rclone_retries)
         command_with_args.append(remote + file)
@@ -203,6 +210,7 @@ class RClone:
         if self._config_file is not None:
             command_with_args.append("--config")
             command_with_args.append(self._config_file)
+        command_with_args.append("--auto-confirm")
         command_with_args.append("--retries")
         command_with_args.append(self._rclone_retries)
         command_with_args.append(remote + file)
@@ -225,6 +233,7 @@ class RClone:
         if self._config_file is not None:
             command_with_args.append("--config")
             command_with_args.append(self._config_file)
+        command_with_args.append("--auto-confirm")
         command_with_args.append("--retries")
         command_with_args.append(self._rclone_retries)
         command_with_args.append(src)
@@ -250,6 +259,7 @@ class RClone:
         if self._config_file is not None:
             command_with_args.append("--config")
             command_with_args.append(self._config_file)
+        command_with_args.append("--auto-confirm")
         command_with_args.append("--retries")
         command_with_args.append(self._rclone_retries)
         command_with_args.append(src)
@@ -272,6 +282,7 @@ class RClone:
         if self._config_file is not None:
             command_with_args.append("--config")
             command_with_args.append(self._config_file)
+        command_with_args.append("--auto-confirm")
         command_with_args.append("--retries")
         command_with_args.append(self._rclone_retries)
         command_with_args.append(remote)
@@ -294,6 +305,7 @@ class RClone:
         if self._config_file is not None:
             command_with_args.append("--config")
             command_with_args.append(self._config_file)
+        command_with_args.append("--auto-confirm")
         command_with_args.append("--retries")
         command_with_args.append(self._rclone_retries)
         command_with_args.append(remote)
@@ -316,7 +328,8 @@ class RClone:
             command_with_args.append(extra_arg)
         if self._config_file is not None:
             command_with_args.append("--config")
-            command_with_args.append(self._config_file, src, dst)
+            command_with_args.append(self._config_file)
+        command_with_args.append("--auto-confirm")
         command_with_args.append("--retries")
         command_with_args.append(self._rclone_retries)
         result = common.execute(command_with_args)
