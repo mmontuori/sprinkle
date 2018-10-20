@@ -78,6 +78,7 @@ class ClSync:
             file = '/' + file
         files = {}
         for remote in self.get_remotes():
+            common.print_line('retrieving file list from: ' + remote + file + '...')
             logging.debug('getting lsjson from ' + remote + file)
             try:
                 json_out = self._rclone.lsjson(remote, file, ['--recursive', '--fast-list'], True)
@@ -205,6 +206,7 @@ class ClSync:
         return clfiles
 
     def compare_clfiles(self, local_dir, local_clfiles, remote_clfiles):
+        common.print_line('comparing for differences...')
         logging.debug('comparing clfiles')
         logging.debug('local directory: ' + local_dir)
         logging.debug('local clfiles size: ' + str(len(local_clfiles)))
