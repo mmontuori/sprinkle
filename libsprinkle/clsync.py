@@ -277,7 +277,10 @@ class ClSync:
         for op in ops:
             logging.debug('operation: ' + op.operation + ", path: " + op.src.path)
             if self._show_progress:
-                bar.message = 'file:' + op.src.name.ljust(25)
+                bar_title = op.src.name.ljust(25, '.')
+                if len(bar_title) > 25:
+                    bar_title = bar_title[0:25]
+                bar.message = 'file:' + bar_title
             if op.src.is_dir and op.operation != operation.Operation.REMOVE:
                 logging.debug('skipping directory ' + op.src.path)
                 continue
@@ -400,4 +403,3 @@ class ClSync:
                     common.print_line('found duplicate file. Removing: ' + file_to_remove + '...')
                     self.delete_file(key, files[key].remote)
                 logging.debug('file to remove: ' + file_to_remove)
-                
