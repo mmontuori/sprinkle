@@ -37,6 +37,7 @@ def usage():
     print("     backup = backup files to clustered drives")
     print("    restore = restore files from clustered drives")
     print("      stats = display volume statistics")
+    print(" removedups = removes duplicate files")
 
 
 def usage_ls():
@@ -56,6 +57,11 @@ def usage_restore():
 
 def usage_stats():
     print("usage: sprinkle.py {-c|--conf <config file>} stats [volume]")
+    print("*** TO BE FINISHED ***")
+
+
+def usage_removedups():
+    print("usage: sprinkle.py {-c|--conf <config file>} removedups [pattern]")
     print("*** TO BE FINISHED ***")
 
 
@@ -184,11 +190,7 @@ def ls():
         sys.exit(-1)
     files = cl_sync.ls(common.remove_ending_slash(__args[1]))
     largest_length = 25
-    keys = []
-    for key in files:
-        logging.debug('appending for sort: ' + key)
-        keys.append(key)
-    keys.sort()
+    keys = common.sort_dict_keys(files)
     for tmp_file in keys:
         filename_length = len(files[tmp_file].path)
         if not files[tmp_file].is_dir and filename_length > largest_length:
@@ -290,6 +292,17 @@ def stats():
                       )
 
 
+
+def remove_duplicates():
+    common.print_line('removing duplicates')
+    cl_sync = clsync.ClSync(__config)
+    if len(__args) == 1:
+        logging.error('invalid ls command')
+        usage_removedups()
+        sys.exit(-1)
+    files = cl_sync.remove_duplicates(common.remove_ending_slash(__args[1]))
+
+
 def main(argv):
     logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
     read_args(argv)
@@ -307,6 +320,8 @@ def main(argv):
         restore()
     elif __args[0] == 'stats':
         stats()
+    elif __args[0] == 'removedups':
+        remove_duplicates()
     else:
         logging.error('invalid command')
         usage()

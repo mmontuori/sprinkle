@@ -12,6 +12,8 @@ __revision__ = "2"
 import subprocess
 import os.path
 import logging
+import time
+import datetime
 
 def combine_jsons(json_str):
     return '[' + json_str.replace(']\n',',',json_str.count(']\n')-1).replace('||[\n','')
@@ -92,3 +94,15 @@ def convert_unit(amount, unit):
     if unit == 'B':
         return amount
 
+
+def sort_dict_keys(dictionary):
+    tmp_keys = []
+    for key in dictionary:
+        logging.debug('appending for sort: ' + key)
+        tmp_keys.append(key)
+    tmp_keys.sort()
+    return tmp_keys
+
+
+def get_datetime_from_iso8601(iso_date):
+    return datetime.datetime.strptime(iso_date, "%Y-%m-%dT%H:%M:%S.%fZ")

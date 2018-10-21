@@ -21,6 +21,8 @@ import os
 
 class ClSync:
 
+    duplicate_suffix = ".sprinkle_duplicate_file"
+
     def __init__(self, config):
         logging.debug('constructing ClSync')
         if config is None:
@@ -72,7 +74,7 @@ class ClSync:
             logging.debug('creating directory ' + remote + directory)
             self._rclone.mkdir(remote, directory)
 
-    def ls(self, file):
+    def ls(self, file, with_dups=False):
         logging.debug('lsjson of file: ' + file)
         if not file.startswith('/'):
             file = '/' + file
@@ -98,7 +100,10 @@ class ClSync:
                 tmp_file.mod_time = tmp_json_file['ModTime']
                 tmp_file.is_dir = tmp_json_file['IsDir']
                 tmp_file.id = tmp_json_file['ID']
-                files[file + '/' + tmp_json_file['Path']] = tmp_file
+                key = file + '/' + tmp_json_file['Path']
+                if with_dups and tmp_file.is_dir is False and key in files:
+                    key = key + ClSync.duplicate_suffix
+                files[key] = tmp_file
             logging.debug('end of clsync.ls()')
         return files
 
@@ -367,3 +372,32 @@ class ClSync:
     def sync(self, path):
         logging.debug('synchronize path ' + path)
 
+    def remove_duplicates(self, path):
+        files = self.ls(path, True)
+        common.print_line('analyzing for duplications...')
+        keys = common.sort_dict_keys(files)
+        for key in keys:
+            if key.endswith(ClSync.duplicate_suffix):
+                logging.debug('found duplicate file: ' + key)
+                date1 = common.get_datetime_from_iso8601(files[key].mod_time)
+                logging.debug(key + ' timestamp: ' + str(date1.timestamp()))
+                key2 = key.replace(ClSync.duplicate_suffix, '')
+                date2 = common.get_datetime_from_iso8601(files[key2].mod_time)
+                logging.debug(key2 + ' timestamp: ' + str(date2.timestamp()))
+                if date1.timestamp() > date2.timestamp():
+                    logging.debug(key + ' is newer than ' + key2)
+                    file_to_remove = files[key2].remote + key2
+                    common.print_line('found duplicate file. Removing: ' + file_to_remove + '...')
+                    self.delete_file(key2, files[key2].remote)
+                elif date1.timestamp() == date1.timestamp():
+                    logging.debug(key + ' is equal to ' + key2)
+                    file_to_remove = files[key2].remote + key2
+                    common.print_line('found duplicate file. Removing: ' + file_to_remove + '...')
+                    self.delete_file(key2, files[key2].remote)
+                else:
+                    logging.debug(key + ' is older than ' + key2)
+                    file_to_remove = files[key].remote + key
+                    common.print_line('found duplicate file. Removing: ' + file_to_remove + '...')
+                    self.delete_file(key, files[key].remote)
+                logging.debug('file to remove: ' + file_to_remove)
+                
