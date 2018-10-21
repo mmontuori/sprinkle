@@ -268,7 +268,7 @@ class ClSync:
         remote_clfiles = self.ls(os.path.basename(local_dir))
         ops = self.compare_clfiles(local_dir, local_clfiles, remote_clfiles)
         if self._show_progress:
-            bar = Bar('Progress', max=len(ops), suffix='%(index)d/%(max)d - %(percent)d%% - %(eta)ds')
+            bar = Bar('Progress', max=len(ops), suffix='%(index)d/%(max)d - [%(percent)d%%] - [%(elapsed_td)s / %(eta_td)s]')
         for op in ops:
             logging.debug('operation: ' + op.operation + ", path: " + op.src.path)
             if self._show_progress:
