@@ -18,6 +18,9 @@ import getopt
 import sys
 
 
+def print_heading():
+    print('Sprinkle Utility')
+
 def usage():
     print("usage: sprinkle.py [options} {command=None} {arg...arg}")
     print("  options:")
@@ -56,7 +59,7 @@ def usage_restore():
 
 
 def usage_stats():
-    print("usage: sprinkle.py {-c|--conf <config file>} stats [volume]")
+    print("usage: sprinkle.py {-c|--conf <config file>} stats")
     print("*** TO BE FINISHED ***")
 
 
@@ -310,7 +313,7 @@ def main(argv):
     override_config()
     logging.debug('config: ' + str(__config))
 
-    common.print_line('Sprinkle Utility')
+    print_heading()
 
     if __args[0] == 'ls':
         ls()

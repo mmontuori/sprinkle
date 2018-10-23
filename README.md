@@ -6,8 +6,17 @@ backup and recovery.
 
 ## Getting Started
 
-Get started by quickly cloning the repository to your running machine:
+The easiest way to install Sprinkle is via PyPI with:
+```
+pip3 install sprinkle-py
+```
 
+Via Snap:
+```
+sudo snap install sprinkle
+```
+
+By cloning the repository to your running machine:
 ```
 git clone https://gitlab.com/mmontuori/sprinkle.git
 cd sprinkle
