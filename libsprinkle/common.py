@@ -106,3 +106,7 @@ def sort_dict_keys(dictionary):
 
 def get_datetime_from_iso8601(iso_date):
     return datetime.datetime.strptime(iso_date, "%Y-%m-%dT%H:%M:%S.%fZ")
+
+
+def get_printable_datetime(iso_date):
+    return get_datetime_from_iso8601(iso_date).strftime("%Y-%m-%d:%H:%M:%S")

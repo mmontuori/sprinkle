@@ -19,7 +19,7 @@ import sys
 
 
 def print_heading():
-    print('Sprinkle Utility')
+    print('sprinkle the cloud clustered backup utility')
 
 def usage():
     print("usage: sprinkle.py [options} {command=None} {arg...arg}")
@@ -201,13 +201,13 @@ def ls():
     common.print_line('---' + " " +
                       'NAME'.ljust(largest_length) + " " +
                       'SIZE'.rjust(9) + " " +
-                      'MOD TIME'.ljust(25) + " " +
+                      'MOD TIME'.ljust(19) + " " +
                       'REMOTE'
                       )
     common.print_line('---' + " " +
                       ''.join('-' for i in range(largest_length)) + " " +
                       ''.join('-' for i in range(9)) + " " +
-                      ''.join('-' for i in range(25)) + " " +
+                      ''.join('-' for i in range(19)) + " " +
                       ''.join('-' for i in range(15))
                       )
 
@@ -222,7 +222,7 @@ def ls():
         common.print_line(first_chars + " " +
                           file_name.ljust(largest_length) + " " +
                           str(files[tmp_file].size).rjust(9) + " " +
-                          files[tmp_file].mod_time.ljust(25) + " " +
+                          common.get_printable_datetime(files[tmp_file].mod_time).ljust(19) + " " +
                           files[tmp_file].remote
                           )
 
