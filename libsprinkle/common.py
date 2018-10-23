@@ -105,7 +105,19 @@ def sort_dict_keys(dictionary):
 
 
 def get_datetime_from_iso8601(iso_date):
-    return datetime.datetime.strptime(iso_date, "%Y-%m-%dT%H:%M:%S.%fZ")
+    ret_date = None
+    try:
+        ret_date = datetime.datetime.strptime(iso_date, "%Y-%m-%dT%H:%M:%S.%fZ")
+    except Exception:
+        logging.debug('error converting date ' + iso_date +' with format %Y-%m-%dT%H:%M:%S.%fZ')
+    if ret_date is None:
+        try:
+            ret_date = datetime.datetime.strptime(iso_date, "%Y-%m-%dT%H:%M:%SZ")
+        except Exception:
+            logging.debug('error converting date ' + iso_date + ' with format %Y-%m-%dT%H:%M:%SZ')
+    if ret_date is None:
+        ret_date = "0000-00-00:00:00:00"
+    return ret_date
 
 
 def get_printable_datetime(iso_date):
