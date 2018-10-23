@@ -19,7 +19,9 @@ import sys
 
 
 def print_heading():
-    print('sprinkle the cloud clustered backup utility')
+    print("***********************************************")
+    print('* sprinkle the cloud clustered backup utility *')
+    print("***********************************************")
 
 def usage():
     print("usage: sprinkle.py [options} {command=None} {arg...arg}")
@@ -186,7 +188,6 @@ def init_logging(debug):
 
 def ls():
     cl_sync = clsync.ClSync(__config)
-    common.print_line('retrieving file list...')
     if len(__args) == 1:
         logging.error('invalid ls command')
         usage_ls()
