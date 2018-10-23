@@ -185,6 +185,7 @@ class ClSync:
             raise Exception('unsupported distribution mode ' + self._distribution_type)
 
     def index_local_dir(self, local_dir):
+        common.print_line('indexing local directory: ' + local_dir + '...')
         clfiles = {}
         for root, dirs, files in os.walk(local_dir):
             for name in dirs:
@@ -261,7 +262,7 @@ class ClSync:
                 op = operation.Operation(operation.Operation.REMOVE,
                                          remote_clfile, None)
                 operations.append(op)
-
+        common.print_line('found ' + str(len(operations)) + ' differences')
         return operations
 
     def backup(self, local_dir):
@@ -272,8 +273,10 @@ class ClSync:
         local_clfiles = self.index_local_dir(local_dir)
         remote_clfiles = self.ls(os.path.basename(local_dir))
         ops = self.compare_clfiles(local_dir, local_clfiles, remote_clfiles)
-        if self._show_progress:
+        if len(ops) > 0 and self._show_progress:
             bar = Bar('Progress', max=len(ops), suffix='%(index)d/%(max)d %(percent)d%% [%(elapsed_td)s/%(eta_td)s]')
+        else:
+            common.print_line('no action')
         for op in ops:
             logging.debug('operation: ' + op.operation + ", path: " + op.src.path)
             if self._show_progress:
