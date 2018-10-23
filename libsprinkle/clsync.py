@@ -313,7 +313,7 @@ class ClSync:
                     self.delete_file(op.src.path, op.src.remote)
             if self._show_progress:
                 bar.next()
-        if self._show_progress:
+        if  len(ops) > 0 and self._show_progress:
             bar.finish()
 
     def restore_old(self, remote_path, local_dir):
