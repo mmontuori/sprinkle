@@ -276,7 +276,7 @@ class ClSync:
         if len(ops) > 0 and self._show_progress:
             bar = Bar('Progress', max=len(ops), suffix='%(index)d/%(max)d %(percent)d%% [%(elapsed_td)s/%(eta_td)s]')
         else:
-            common.print_line('no action')
+            common.print_line('no action necessary')
         for op in ops:
             logging.debug('operation: ' + op.operation + ", path: " + op.src.path)
             if self._show_progress:
