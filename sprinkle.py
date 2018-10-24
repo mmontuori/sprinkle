@@ -37,6 +37,7 @@ def usage():
     print("   --display_unit = display unit [G|M|K|B]")
     print("        --retries = number of retries (default:1)")
     print("  --show-progress = show progress")
+    print("   --delete-after = delete files on remote end (defaults:false)")
     print("  commands:")
     print("         ls = list files")
     print("     backup = backup files to clustered drives")
@@ -88,6 +89,7 @@ def read_args(argv):
     global __display_unit
     global __rclone_retries
     global __show_progress
+    global __delete_after
 
     __configfile = None
     __cmd_debug = False
@@ -98,6 +100,7 @@ def read_args(argv):
     __display_unit = 'G'
     __rclone_retries = 1
     __show_progress = False
+    __delete_after = False
 
     try:
         opts, args = getopt.getopt(argv, "dvhc:s:",
@@ -112,7 +115,8 @@ def read_args(argv):
                                     "stats=",
                                     "display-unit=",
                                     "retries=",
-                                    "show-progress"])
+                                    "show-progress",
+                                    "delete-after"])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -144,6 +148,8 @@ def read_args(argv):
             __rclone_retries = int(arg)
         elif opt in ("--show-progress"):
             __show_progress = True
+        elif opt in ("--delete-after"):
+            __delete_after = True
 
 
     if len(args) < 1:
@@ -236,7 +242,7 @@ def backup():
         sys.exit(-1)
     local_dir = common.remove_ending_slash(__args[1])
     common.print_line('backing up ' + local_dir + '...')
-    cl_sync.backup(local_dir)
+    cl_sync.backup(local_dir, __delete_after)
 
 
 def restore():

@@ -211,7 +211,7 @@ class ClSync:
         logging.debug('retrieved ' + str(len(clfiles)) + ' files')
         return clfiles
 
-    def compare_clfiles(self, local_dir, local_clfiles, remote_clfiles):
+    def compare_clfiles(self, local_dir, local_clfiles, remote_clfiles, delete_file=False):
         common.print_line('calculating differences...')
         logging.debug('comparing clfiles')
         logging.debug('local directory: ' + local_dir)
@@ -253,29 +253,30 @@ class ClSync:
                     logging.error('compare_method: ' + self._compare_method + ' not valid!')
                     raise Exception('compare_method: ' + self._compare_method + ' not valid!')
 
-        for remote_path in remote_clfiles:
-            remote_clfile = remote_clfiles[remote_path]
-            logging.debug('checking file ' + remote_dir+remote_path + ' for deletion')
-            rel_name = common.remove_localdir(local_dir, remote_clfile.path + '/' + remote_clfile.name)
-            rel_path = common.remove_localdir(local_dir, remote_clfile.path)
-            logging.debug('relative name: ' + rel_name)
-            if remote_dir+remote_path not in local_clfiles:
-                logging.debug('file ' + remote_path + ' has been deleted')
-                remote_clfile.remote_path = rel_path
-                op = operation.Operation(operation.Operation.REMOVE,
-                                         remote_clfile, None)
-                operations.append(op)
+        if delete_file is True:
+            for remote_path in remote_clfiles:
+                remote_clfile = remote_clfiles[remote_path]
+                logging.debug('checking file ' + remote_dir+remote_path + ' for deletion')
+                rel_name = common.remove_localdir(local_dir, remote_clfile.path + '/' + remote_clfile.name)
+                rel_path = common.remove_localdir(local_dir, remote_clfile.path)
+                logging.debug('relative name: ' + rel_name)
+                if remote_dir+remote_path not in local_clfiles:
+                    logging.debug('file ' + remote_path + ' has been deleted')
+                    remote_clfile.remote_path = rel_path
+                    op = operation.Operation(operation.Operation.REMOVE,
+                                             remote_clfile, None)
+                    operations.append(op)
         common.print_line('found ' + str(len(operations)) + ' differences')
         return operations
 
-    def backup(self, local_dir):
+    def backup(self, local_dir, delete_after=False):
         logging.debug('backing up directory ' + local_dir)
         if not common.is_dir(local_dir):
             logging.error("local directory " + local_dir + " not found. Cannot continue!")
             raise Exception("Local directory " + local_dir + " not found")
         local_clfiles = self.index_local_dir(local_dir)
         remote_clfiles = self.ls(os.path.basename(local_dir))
-        ops = self.compare_clfiles(local_dir, local_clfiles, remote_clfiles)
+        ops = self.compare_clfiles(local_dir, local_clfiles, remote_clfiles, delete_after)
         if len(ops) > 0 and self._show_progress:
             bar = Bar('Progress', max=len(ops), suffix='%(index)d/%(max)d %(percent)d%% [%(elapsed_td)s/%(eta_td)s]')
         else:
@@ -304,7 +305,7 @@ class ClSync:
                     common.print_line('backing up file ' + op.src.path + '/' + op.src.name +
                                   ' -> ' + op.src.remote + ':' + op.src.remote_path)
                 self.copy(op.src.path + '/' + op.src.name, op.src.remote_path, op.src.remote)
-            if op.operation == operation.Operation.REMOVE:
+            if op.operation == operation.Operation.REMOVE and delete_after:
                 if not self._show_progress:
                     common.print_line('removing ' + op.src.remote+op.src.path)
                 if op.src.is_dir:
