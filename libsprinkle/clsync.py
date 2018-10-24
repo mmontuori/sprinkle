@@ -256,8 +256,8 @@ class ClSync:
         for remote_path in remote_clfiles:
             remote_clfile = remote_clfiles[remote_path]
             logging.debug('checking file ' + remote_dir+remote_path + ' for deletion')
-            rel_name = common.remove_localdir(local_dir, local_clfile.path + '/' + local_clfile.name)
-            rel_path = common.remove_localdir(local_dir, local_clfile.path)
+            rel_name = common.remove_localdir(local_dir, remote_clfile.path + '/' + remote_clfile.name)
+            rel_path = common.remove_localdir(local_dir, remote_clfile.path)
             logging.debug('relative name: ' + rel_name)
             if remote_dir+remote_path not in local_clfiles:
                 logging.debug('file ' + remote_path + ' has been deleted')
