@@ -107,6 +107,28 @@ class ClSync:
             logging.debug('end of clsync.ls()')
         return files
 
+    def lsmd5(self, file, with_dups=False):
+        logging.debug('lsjson of file: ' + file)
+        if not file.startswith('/'):
+            file = '/' + file
+        files = {}
+        for remote in self.get_remotes():
+            common.print_line('retrieving file list from: ' + remote + file + '...')
+            logging.debug('getting lsjson from ' + remote + file)
+            try:
+                out = self._rclone.md5sum(remote, file, ['--fast-list'], True)
+            except exceptions.FileNotFoundException as e:
+                out = ''
+            #logging.debug('out: ' + str(out.split('\n')))
+            md5s = out.split('\n')
+            for line in md5s:
+                if line == '':
+                    continue
+                md5 = line.split('  ')[0]
+                filename = line.split('  ')[1]
+                files[filename] = md5
+        return files
+
     def get_sizes(self):
         logging.debug('getting sizes')
         if self._sizes is None:

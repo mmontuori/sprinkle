@@ -31,7 +31,7 @@ def usage():
     print("    -v|--version  = print version")
     print("    -d|--debug    = debug output")
     print("    --dist-type   = distribution type (defaults:mas)")
-    print("    --comp-method = compare method (defaults:size)")
+    print("    --comp-method = compare method [size|md5] (defaults:size)")
     print("     --rclone-exe = rclone executable (defaults:rclone)")
     print("    --rclone-conf = rclone configuration (defaults:None)")
     print("   --display_unit = display unit [G|M|K|B]")
@@ -40,6 +40,7 @@ def usage():
     print("   --delete-after = delete files on remote end (defaults:false)")
     print("  commands:")
     print("         ls = list files")
+    print("      lsmd5 = list md5 of files")
     print("     backup = backup files to clustered drives")
     print("    restore = restore files from clustered drives")
     print("      stats = display volume statistics")
@@ -48,6 +49,11 @@ def usage():
 
 def usage_ls():
     print("usage: sprinkle.py {-c|--conf <config file>} ls {pattern}")
+    print("*** TO BE FINISHED ***")
+
+
+def usage_lsmd5():
+    print("usage: sprinkle.py {-c|--conf <config file>} lsmd5 {pattern}")
     print("*** TO BE FINISHED ***")
 
 
@@ -233,6 +239,31 @@ def ls():
                           files[tmp_file].remote
                           )
 
+def lsmd5():
+    cl_sync = clsync.ClSync(__config)
+    if len(__args) == 1:
+        logging.error('invalid ls command')
+        usage_lsmd5()
+        sys.exit(-1)
+    files = cl_sync.lsmd5(common.remove_ending_slash(__args[1]))
+    largest_length = 25
+    keys = common.sort_dict_keys(files)
+    for tmp_file in keys:
+        filename_length = len(tmp_file)
+        if filename_length > largest_length:
+            largest_length = filename_length
+    common.print_line('NAME'.ljust(largest_length) + " " +
+                      'MD5'.ljust(32)
+                      )
+    common.print_line(''.join('-' for i in range(largest_length)) + " " +
+                      ''.join('-' for i in range(32))
+                      )
+
+    for tmp_file in keys:
+        file_name = tmp_file
+        common.print_line(file_name.ljust(largest_length) + " " +
+                          files[tmp_file]
+                          )
 
 def backup():
     cl_sync = clsync.ClSync(__config)
@@ -324,6 +355,8 @@ def main(argv):
 
     if __args[0] == 'ls':
         ls()
+    elif __args[0] == 'lsmd5':
+        lsmd5()
     elif __args[0] == 'backup':
         backup()
     elif __args[0] == 'restore':

@@ -54,11 +54,11 @@ class RClone:
         remotes = result['out'].splitlines()
         return remotes
 
-    def lsjson(self, remote, directory, extra_args=[], no_error=False):
+    def md5sum(self, remote, directory, extra_args=[], no_error=False):
         logging.debug('running lsjson for ' + remote + directory)
         command_with_args = []
         command_with_args.append(self._rclone_exe)
-        command_with_args.append("lsjson")
+        command_with_args.append("md5sum")
         for extra_arg in extra_args:
             command_with_args.append(extra_arg)
         if self._config_file is not None:
