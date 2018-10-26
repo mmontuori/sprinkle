@@ -54,6 +54,35 @@ class RClone:
         remotes = result['out'].splitlines()
         return remotes
 
+    def lsjson(self, remote, directory, extra_args=[], no_error=False):
+        logging.debug('running lsjson for ' + remote + directory)
+        command_with_args = []
+        command_with_args.append(self._rclone_exe)
+        command_with_args.append("lsjson")
+        for extra_arg in extra_args:
+            command_with_args.append(extra_arg)
+        if self._config_file is not None:
+            command_with_args.append("--config")
+            command_with_args.append(self._config_file)
+        command_with_args.append("--retries")
+        command_with_args.append(self._rclone_retries)
+        command_with_args.append(remote + directory)
+        result = common.execute(command_with_args, no_error)
+        logging.debug('result: ' + str(result))
+        if result['error'] is not '':
+            if no_error is False:
+                # logging.error('error getting remotes objects')
+                if result['error'].find("directory not found") != -1:
+                    raise exceptions.FileNotFoundException(result['error'])
+                else:
+                    raise Exception('error getting remote object. ' + result['error'])
+        if 'out' in result and result['out'] == '[\n':
+            lsjson = '[]'
+        else:
+            lsjson = result['out']
+        logging.debug('returning ' + str(lsjson))
+        return lsjson
+
     def md5sum(self, remote, directory, extra_args=[], no_error=False):
         logging.debug('running lsjson for ' + remote + directory)
         command_with_args = []

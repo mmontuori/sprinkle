@@ -38,6 +38,7 @@ def usage():
     print("        --retries = number of retries (default:1)")
     print("  --show-progress = show progress")
     print("   --delete-after = delete files on remote end (defaults:false)")
+    print("        --dry-run = perform a dry run without actually backing up")
     print("  commands:")
     print("         ls = list files")
     print("      lsmd5 = list md5 of files")
@@ -96,6 +97,7 @@ def read_args(argv):
     global __rclone_retries
     global __show_progress
     global __delete_after
+    global __dry_run
 
     __configfile = None
     __cmd_debug = False
@@ -107,6 +109,7 @@ def read_args(argv):
     __rclone_retries = 1
     __show_progress = False
     __delete_after = False
+    __dry_run = False
 
     try:
         opts, args = getopt.getopt(argv, "dvhc:s:",
@@ -122,6 +125,7 @@ def read_args(argv):
                                     "display-unit=",
                                     "retries=",
                                     "show-progress",
+                                    "dry-run",
                                     "delete-after"])
     except getopt.GetoptError:
         usage()
@@ -156,6 +160,8 @@ def read_args(argv):
             __show_progress = True
         elif opt in ("--delete-after"):
             __delete_after = True
+        elif opt in ("--dry-run"):
+            __dry_run = True
 
 
     if len(args) < 1:
@@ -273,7 +279,7 @@ def backup():
         sys.exit(-1)
     local_dir = common.remove_ending_slash(__args[1])
     common.print_line('backing up ' + local_dir + '...')
-    cl_sync.backup(local_dir, __delete_after)
+    cl_sync.backup(local_dir, __delete_after, __dry_run)
 
 
 def restore():
@@ -285,7 +291,7 @@ def restore():
     remote_path = __args[2]
     local_dir = common.remove_ending_slash(__args[1])
     common.print_line('restoring ' + local_dir + ' from ' + remote_path)
-    cl_sync.restore(local_dir, remote_path)
+    cl_sync.restore(local_dir, remote_path, __dry_run)
 
 
 def stats():

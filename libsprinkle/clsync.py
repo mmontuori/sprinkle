@@ -291,7 +291,7 @@ class ClSync:
         common.print_line('found ' + str(len(operations)) + ' differences')
         return operations
 
-    def backup(self, local_dir, delete_after=False):
+    def backup(self, local_dir, delete_after=False, dry_run=False):
         logging.debug('backing up directory ' + local_dir)
         if not common.is_dir(local_dir):
             logging.error("local directory " + local_dir + " not found. Cannot continue!")
@@ -303,6 +303,8 @@ class ClSync:
             bar = Bar('Progress', max=len(ops), suffix='%(index)d/%(max)d %(percent)d%% [%(elapsed_td)s/%(eta_td)s]')
         else:
             common.print_line('no action necessary')
+        if dry_run is True:
+            common.print_line('performing a dry run. no changes are committed')
         for op in ops:
             logging.debug('operation: ' + op.operation + ", path: " + op.src.path)
             if self._show_progress:
@@ -319,24 +321,28 @@ class ClSync:
                 if not self._show_progress:
                     common.print_line('backing up file ' + op.src.path+'/'+op.src.name +
                                   ' -> ' + best_remote+':'+op.src.remote_path)
-                self.copy(op.src.path+'/'+op.src.name, op.src.remote_path, best_remote)
+                if dry_run is False:
+                    self.copy(op.src.path+'/'+op.src.name, op.src.remote_path, best_remote)
             if op.operation == operation.Operation.UPDATE:
                 best_remote = self.get_best_remote(int(op.src.size))
                 logging.debug('best remote: ' + best_remote)
                 if not self._show_progress:
                     common.print_line('backing up file ' + op.src.path + '/' + op.src.name +
                                   ' -> ' + op.src.remote + ':' + op.src.remote_path)
-                self.copy(op.src.path + '/' + op.src.name, op.src.remote_path, op.src.remote)
+                if dry_run is False:
+                    self.copy(op.src.path + '/' + op.src.name, op.src.remote_path, op.src.remote)
             if op.operation == operation.Operation.REMOVE and delete_after:
                 if not self._show_progress:
                     common.print_line('removing ' + op.src.remote+op.src.path)
                 if op.src.is_dir:
-                    try:
-                        self.rmdir(op.src.path, op.src.remote)
-                    except Exception as e:
-                        logging.debug(str(e))
+                    if dry_run is False:
+                        try:
+                            self.rmdir(op.src.path, op.src.remote)
+                        except Exception as e:
+                            logging.debug(str(e))
                 else:
-                    self.delete_file(op.src.path, op.src.remote)
+                    if dry_run is False:
+                        self.delete_file(op.src.path, op.src.remote)
             if self._show_progress:
                 bar.next()
         if  len(ops) > 0 and self._show_progress:
@@ -359,7 +365,7 @@ class ClSync:
             self.copy_new(remote+os.path.dirname(path), local_dir)
 
 
-    def restore(self, remote_path, local_dir):
+    def restore(self, remote_path, local_dir, dry_run=False):
         logging.debug('restoring directory ' + local_dir + ' from ' + remote_path)
         if not common.is_dir(local_dir):
             #logging.error('directory ' + local_dir + ' not found')
@@ -369,7 +375,8 @@ class ClSync:
         for remote in self.get_remotes():
             common.print_line('restoring file ' + remote+remote_path + ' -> ' + local_dir)
             logging.debug('restoring file ' + remote+remote_path + ' -> ' + local_dir)
-            self.copy_new(remote+remote_path, local_dir, True)
+            if dry_run is False:
+                self.copy_new(remote+remote_path, local_dir, True)
 
 
     def rmdir(self, directory, remote):
