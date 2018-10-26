@@ -79,6 +79,9 @@ class ClSync:
         if not file.startswith('/'):
             file = '/' + file
         files = {}
+        md5s = None
+        if self._compare_method == 'md5':
+            md5s = self.lsmd5(file)
         for remote in self.get_remotes():
             common.print_line('retrieving file list from: ' + remote + file + '...')
             logging.debug('getting lsjson from ' + remote + file)
@@ -101,13 +104,15 @@ class ClSync:
                 tmp_file.is_dir = tmp_json_file['IsDir']
                 tmp_file.id = tmp_json_file['ID']
                 key = file + '/' + tmp_json_file['Path']
+                if self._compare_method == 'md5' and not tmp_file.is_dir:
+                    tmp_file.md5 = md5s[key]
                 if with_dups and tmp_file.is_dir is False and key in files:
                     key = key + ClSync.duplicate_suffix
                 files[key] = tmp_file
             logging.debug('end of clsync.ls()')
         return files
 
-    def lsmd5(self, file, with_dups=False):
+    def lsmd5(self, file):
         logging.debug('lsjson of file: ' + file)
         if not file.startswith('/'):
             file = '/' + file
@@ -126,7 +131,7 @@ class ClSync:
                     continue
                 md5 = line.split('  ')[0]
                 filename = line.split('  ')[1]
-                files[filename] = md5
+                files[file + '/' + filename] = md5
         return files
 
     def get_sizes(self):
@@ -229,6 +234,8 @@ class ClSync:
                 tmp_clfile.name = name
                 tmp_clfile.size = os.stat(full_path).st_size
                 tmp_clfile.mod_time = os.stat(full_path).st_mtime
+                if self._compare_method == 'md5':
+                    tmp_clfile.md5 = common.get_md5(full_path)
                 clfiles[common.normalize_path(tmp_clfile.path+'/'+tmp_clfile.name)] = tmp_clfile
         logging.debug('retrieved ' + str(len(clfiles)) + ' files')
         return clfiles
@@ -265,6 +272,19 @@ class ClSync:
                     logging.debug('local_file.size:' + str(local_clfile.size) +
                                   ', remote_clfile.size:' + str(remote_clfile.size))
                     if size_local != size_remote:
+                        logging.debug('file has changed')
+                        local_clfile.remote_path = rel_path
+                        local_clfile.remote = current_remote
+                        op = operation.Operation(operation.Operation.UPDATE,
+                                                 local_clfile, None)
+                        operations.append(op)
+                elif self._compare_method == 'md5':
+                    local_md5 = local_clfile.md5
+                    remote_md5 = remote_clfile.md5
+                    current_remote = remote_clfiles[rel_name].remote
+                    logging.debug('local_file.md5:' + str(local_md5) +
+                                  ', remote_clfile.md5:' + str(remote_md5))
+                    if local_md5 != remote_md5:
                         logging.debug('file has changed')
                         local_clfile.remote_path = rel_path
                         local_clfile.remote = current_remote

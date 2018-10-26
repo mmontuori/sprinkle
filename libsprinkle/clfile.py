@@ -20,3 +20,4 @@ class ClFile(object):
     mod_time = None
     is_dir = None
     id = None
+    md5 = None

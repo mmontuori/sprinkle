@@ -122,3 +122,22 @@ def get_datetime_from_iso8601(iso_date):
 
 def get_printable_datetime(iso_date):
     return get_datetime_from_iso8601(iso_date).strftime("%Y-%m-%d:%H:%M:%S")
+
+
+def get_md5(filename, block_size=2**20):
+    import hashlib
+    md5 = hashlib.md5()
+    try:
+        file = open(filename, 'rb')
+        while True:
+            data = file.read(block_size)
+            if not data:
+                break
+            md5.update(data)
+    except IOError:
+        print('File \'' + filename + '\' not found!')
+        return None
+    except Exception:
+        return None
+    logging.debug('md5 for file ' + filename + ' is ' + md5.hexdigest())
+    return md5.hexdigest()
