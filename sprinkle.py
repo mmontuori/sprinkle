@@ -218,7 +218,7 @@ def configure(config_file):
         __config = {}
 
     if __cmd_debug is True:
-        init_logging('true')
+        init_logging(True)
     elif 'debug' in __config:
         init_logging(__config['debug'])
     if __dist_type is not None:
@@ -252,7 +252,7 @@ def configure(config_file):
 
 def verify_configuration():
     logging.debug('verifying configuration')
-    if __config['smtp_enable'] == 'true':
+    if __config['smtp_enable'] is True:
         if 'smtp_from' not in __config:
             raise Exception('smtp_from value is None')
         if 'smtp_to' not in __config:
@@ -264,7 +264,7 @@ def verify_configuration():
 
 
 def init_logging(debug):
-    if debug.lower() == "true":
+    if debug is True:
         logging.getLogger().setLevel(logging.DEBUG)
     else:
         logging.getLogger().setLevel(logging.INFO)
@@ -432,7 +432,7 @@ def main(argv):
         try:
             backup()
         except Exception as e:
-            if __config['smtp_enable'].lower() == 'true':
+            if __config['smtp_enable'] is True:
                 logging.info('sending email')
                 email = smtp_email.EMail()
                 email.set_from(__config['smtp_from'])

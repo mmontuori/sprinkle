@@ -26,6 +26,22 @@ class Config(object):
     including defaults where possible.
     """
 
+    _default_fields = [
+        "debug",
+        "dry_run",
+        "show_progress",
+        "delete_files",
+        "smtp_enable"
+    ]
+
+    _default_values = {
+        "debug": False,
+        "dry_run": False,
+        "show_progress": False,
+        "delete_files": True,
+        "smtp_enable": False
+    }
+
     _conf_obj = None
 
     _CONFIG_MAIN_SECTION = 'MAIN'
@@ -60,4 +76,13 @@ class Config(object):
         retconf = {}
         for name, value in self._conf_obj.items(self._CONFIG_MAIN_SECTION):
             retconf[name] = value
+        for field in self._default_fields:
+            if field in retconf:
+                boolvalue = retconf[field]
+                if boolvalue.lower() == 'true':
+                    retconf[field] = True
+                else:
+                    retconf[field] = False
+            else:
+                retconf[field] = self._default_values[field]
         return retconf
