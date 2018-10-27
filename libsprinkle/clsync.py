@@ -36,10 +36,6 @@ class ClSync:
             rclone_config = self._config['rclone_config']
         else:
             rclone_config = None
-        if 'rclone_exe' not in self._config:
-            self._rclone = rclone.RClone(rclone_config)
-        else:
-            self._rclone = rclone.RClone(rclone_config, self._config['rclone_exe'])
         if 'distribution_type' in config:
             self._distribution_type = config['distribution_type']
         else:
@@ -58,7 +54,12 @@ class ClSync:
         self._remote_calls = 0
         self._sizes = None
         self._frees = None
-        self._show_progress = config['show-progress']
+        self._show_progress = config['show_progress']
+
+        if 'rclone_exe' not in self._config:
+            self._rclone = rclone.RClone(rclone_config)
+        else:
+            self._rclone = rclone.RClone(rclone_config, self._config['rclone_exe'], self._rclone_retries)
 
     def get_remotes(self):
         logging.debug('getting rclone remotes')
@@ -311,14 +312,14 @@ class ClSync:
         common.print_line('found ' + str(len(operations)) + ' differences')
         return operations
 
-    def backup(self, local_dir, delete_after=False, dry_run=False):
+    def backup(self, local_dir, delete_files=False, dry_run=False):
         logging.debug('backing up directory ' + local_dir)
         if not common.is_dir(local_dir):
             logging.error("local directory " + local_dir + " not found. Cannot continue!")
             raise Exception("Local directory " + local_dir + " not found")
         local_clfiles = self.index_local_dir(local_dir)
         remote_clfiles = self.ls(os.path.basename(local_dir))
-        ops = self.compare_clfiles(local_dir, local_clfiles, remote_clfiles, delete_after)
+        ops = self.compare_clfiles(local_dir, local_clfiles, remote_clfiles, delete_files)
         if len(ops) > 0 and self._show_progress:
             bar = Bar('Progress', max=len(ops), suffix='%(index)d/%(max)d %(percent)d%% [%(elapsed_td)s/%(eta_td)s]')
         else:
@@ -351,7 +352,7 @@ class ClSync:
                                   ' -> ' + op.src.remote + ':' + op.src.remote_path)
                 if dry_run is False:
                     self.copy(op.src.path + '/' + op.src.name, op.src.remote_path, op.src.remote)
-            if op.operation == operation.Operation.REMOVE and delete_after:
+            if op.operation == operation.Operation.REMOVE and delete_files:
                 if not self._show_progress:
                     common.print_line('removing ' + op.src.remote+op.src.path)
                 if op.src.is_dir:

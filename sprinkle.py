@@ -13,9 +13,11 @@ from libsprinkle import clsync
 from libsprinkle import rclone
 from libsprinkle import config
 from libsprinkle import common
+from libsprinkle import smtp_email
 import logging
 import getopt
 import sys
+import traceback
 
 
 def print_heading():
@@ -96,8 +98,15 @@ def read_args(argv):
     global __display_unit
     global __rclone_retries
     global __show_progress
-    global __delete_after
+    global __delete_files
     global __dry_run
+    global __smtp_enable
+    global __smtp_from
+    global __smtp_to
+    global __smtp_server
+    global __smtp_port
+    global __smtp_user
+    global __smtp_password
 
     __configfile = None
     __cmd_debug = False
@@ -108,8 +117,15 @@ def read_args(argv):
     __display_unit = 'G'
     __rclone_retries = 1
     __show_progress = False
-    __delete_after = False
+    __delete_files = False
     __dry_run = False
+    __smtp_enable = None
+    __smtp_from = None
+    __smtp_to = None
+    __smtp_server = None
+    __smtp_port = None
+    __smtp_user = None
+    __smtp_password = None
 
     try:
         opts, args = getopt.getopt(argv, "dvhc:s:",
@@ -126,7 +142,15 @@ def read_args(argv):
                                     "retries=",
                                     "show-progress",
                                     "dry-run",
-                                    "delete-after"])
+                                    "delete-files",
+                                    "smtp-enable",
+                                    "smtp-from=",
+                                    "smtp-to=",
+                                    "smtp-server=",
+                                    "smtp-port=",
+                                    "smtp-user=",
+                                    "smtp-password="
+                                    ])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -138,7 +162,7 @@ def read_args(argv):
         elif opt in ('-v', '--version'):
             print_version()
             sys.exit(0)
-        elif opt in ("-c", "--configfile"):
+        elif opt in ("-c", "--conf"):
             __configfile = arg
         elif opt in ("-d", "--debug"):
             __cmd_debug = True
@@ -158,11 +182,24 @@ def read_args(argv):
             __rclone_retries = int(arg)
         elif opt in ("--show-progress"):
             __show_progress = True
-        elif opt in ("--delete-after"):
-            __delete_after = True
+        elif opt in ("--delete-files"):
+            __delete_files = True
         elif opt in ("--dry-run"):
             __dry_run = True
-
+        elif opt in ("--smtp-enable"):
+            __smtp_enable = True
+        elif opt in ("--smtp-from"):
+            __smtp_from = arg
+        elif opt in ("--smtp-to"):
+            __smtp_to = arg
+        elif opt in ("--smtp-server"):
+            __smtp_server = arg
+        elif opt in ("--smtp-port"):
+            __smtp_port = arg
+        elif opt in ("--smtp-user"):
+            __smtp_user = arg
+        elif opt in ("--smtp-password"):
+            __smtp_password = arg
 
     if len(args) < 1:
         usage()
@@ -171,16 +208,15 @@ def read_args(argv):
     __args = args
 
 
-def read_config(config_file):
+def configure(config_file):
     global __config
+
     if config_file is not None:
         conf = config.Config(config_file)
         __config = conf.get_config()
     else:
         __config = {}
 
-
-def override_config():
     if __cmd_debug is True:
         init_logging('true')
     elif 'debug' in __config:
@@ -194,7 +230,37 @@ def override_config():
     if __rclone_conf is not None:
         __config['rclone_config'] = __rclone_conf
     __config['rclone_retries'] = str(__rclone_retries)
-    __config['show-progress'] = __show_progress
+    __config['show_progress'] = __show_progress
+    __config['delete_files'] = __delete_files
+    __config['dry_run'] = __dry_run
+    if __smtp_enable is not None:
+        __config['smtp_enable'] = __smtp_enable
+    __config['display_unit'] = __display_unit
+    if __smtp_from is not None:
+        __config['smtp_from'] = __smtp_from
+    if __smtp_to is not None:
+        __config['smtp_to'] = __smtp_to
+    if __smtp_server is not None:
+        __config['smtp_server'] = __smtp_server
+    if __smtp_port is not None:
+        __config['smtp_port'] = __smtp_port
+    if __smtp_user is not None:
+        __config['smtp_user'] = __smtp_user
+    if __smtp_password is not None:
+        __config['smtp_password'] = __smtp_password
+
+
+def verify_configuration():
+    logging.debug('verifying configuration')
+    if __config['smtp_enable'] == 'true':
+        if 'smtp_from' not in __config:
+            raise Exception('smtp_from value is None')
+        if 'smtp_to' not in __config:
+            raise Exception('smtp_to value is None')
+        if 'smtp_server' not in __config:
+            raise Exception('smtp_server value is None')
+        if 'smtp_port' not in __config:
+            raise Exception('smtp_port value is None')
 
 
 def init_logging(debug):
@@ -279,7 +345,7 @@ def backup():
         sys.exit(-1)
     local_dir = common.remove_ending_slash(__args[1])
     common.print_line('backing up ' + local_dir + '...')
-    cl_sync.backup(local_dir, __delete_after, __dry_run)
+    cl_sync.backup(local_dir, __delete_files, __dry_run)
 
 
 def restore():
@@ -339,7 +405,6 @@ def stats():
                       )
 
 
-
 def remove_duplicates():
     common.print_line('removing duplicates')
     cl_sync = clsync.ClSync(__config)
@@ -347,14 +412,14 @@ def remove_duplicates():
         logging.error('invalid ls command')
         usage_removedups()
         sys.exit(-1)
-    files = cl_sync.remove_duplicates(common.remove_ending_slash(__args[1]))
+    cl_sync.remove_duplicates(common.remove_ending_slash(__args[1]))
 
 
 def main(argv):
     logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
     read_args(argv)
-    read_config(__configfile)
-    override_config()
+    configure(__configfile)
+    verify_configuration()
     logging.debug('config: ' + str(__config))
 
     print_heading()
@@ -364,7 +429,25 @@ def main(argv):
     elif __args[0] == 'lsmd5':
         lsmd5()
     elif __args[0] == 'backup':
-        backup()
+        try:
+            backup()
+        except Exception as e:
+            if __config['smtp_enable'].lower() == 'true':
+                logging.info('sending email')
+                email = smtp_email.EMail()
+                email.set_from(__config['smtp_from'])
+                email.set_to(__config['smtp_to'])
+                email.set_smtp_server(__config['smtp_server'])
+                email.set_smtp_port(__config['smtp_port'])
+                if 'smtp_user' in __config:
+                    email.set_smtp_user(__config['smtp_user'])
+                if 'smtp_password' in __config:
+                    email.set_smtp_password(__config['smtp_password'])
+                email.set_subject('Sprinkle Failure Notification')
+                email.set_message('Sprinkle has experienced the following error:\n\n' + str(e) +
+                                  '\n\nExamine logs for additional information')
+                email.send()
+            traceback.print_exc(file=sys.stderr)
     elif __args[0] == 'restore':
         restore()
     elif __args[0] == 'stats':
