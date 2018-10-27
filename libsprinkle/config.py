@@ -31,7 +31,12 @@ class Config(object):
         "dry_run",
         "show_progress",
         "delete_files",
-        "smtp_enable"
+        "smtp_enable",
+        "distribution_type",
+        "compare_method",
+        "display_unit",
+        "retries",
+        'rclone_retries'
     ]
 
     _default_values = {
@@ -39,7 +44,12 @@ class Config(object):
         "dry_run": False,
         "show_progress": False,
         "delete_files": True,
-        "smtp_enable": False
+        "smtp_enable": False,
+        "distribution_type": "mas",
+        "compare_method": "size",
+        "display_unit": "G",
+        "retries": '1',
+        "rclone_retries": '1'
     }
 
     _conf_obj = None
@@ -76,13 +86,4 @@ class Config(object):
         retconf = {}
         for name, value in self._conf_obj.items(self._CONFIG_MAIN_SECTION):
             retconf[name] = value
-        for field in self._default_fields:
-            if field in retconf:
-                boolvalue = retconf[field]
-                if boolvalue.lower() == 'true':
-                    retconf[field] = True
-                else:
-                    retconf[field] = False
-            else:
-                retconf[field] = self._default_values[field]
         return retconf

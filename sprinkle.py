@@ -109,16 +109,16 @@ def read_args(argv):
     global __smtp_password
 
     __configfile = None
-    __cmd_debug = False
+    __cmd_debug = None
     __dist_type = None
     __comp_method = None
     __rclone_exe = None
     __rclone_conf = None
-    __display_unit = 'G'
-    __rclone_retries = 1
-    __show_progress = False
-    __delete_files = False
-    __dry_run = False
+    __display_unit = None
+    __rclone_retries = None
+    __show_progress = None
+    __delete_files = None
+    __dry_run = None
     __smtp_enable = None
     __smtp_from = None
     __smtp_to = None
@@ -139,7 +139,7 @@ def read_args(argv):
                                     "rclone-conf=",
                                     "stats=",
                                     "display-unit=",
-                                    "retries=",
+                                    "rclone-retries=",
                                     "show-progress",
                                     "dry-run",
                                     "delete-files",
@@ -178,7 +178,7 @@ def read_args(argv):
             if arg != 'G' and arg != 'M' and arg != 'K' and arg != 'B':
                 logging.error('invalid UNIT ' + arg + ', only [G|M|K|B] accepted')
             __display_unit = arg
-        elif opt in ("--retries"):
+        elif opt in ("--rclone-retries"):
             __rclone_retries = int(arg)
         elif opt in ("--show-progress"):
             __show_progress = True
@@ -211,47 +211,96 @@ def read_args(argv):
 def configure(config_file):
     global __config
 
+    _default_fields = [
+        "debug",
+        "dry_run",
+        "show_progress",
+        "delete_files",
+        "smtp_enable",
+        "distribution_type",
+        "compare_method",
+        "display_unit",
+        'rclone_retries'
+    ]
+
+    _default_values = {
+        "debug": False,
+        "dry_run": False,
+        "show_progress": False,
+        "delete_files": True,
+        "smtp_enable": False,
+        "distribution_type": "mas",
+        "compare_method": "size",
+        "display_unit": "G",
+        "rclone_retries": '1'
+    }
+
     if config_file is not None:
         conf = config.Config(config_file)
         __config = conf.get_config()
     else:
         __config = {}
 
+    for field in _default_fields:
+        if field not in __config:
+            __config[field] = _default_values[field]
+
     if __cmd_debug is True:
         init_logging(True)
     elif 'debug' in __config:
         init_logging(__config['debug'])
+
     if __dist_type is not None:
         __config['distribution_type'] = __dist_type
+
     if __comp_method is not None:
         __config['compare_method'] = __comp_method
+
     if __rclone_exe is not None:
         __config['rclone_exe'] = __rclone_exe
+
     if __rclone_conf is not None:
         __config['rclone_config'] = __rclone_conf
-    __config['rclone_retries'] = str(__rclone_retries)
-    __config['show_progress'] = __show_progress
-    __config['delete_files'] = __delete_files
-    __config['dry_run'] = __dry_run
+
+    if __rclone_retries is not None:
+        __config['rclone_retries'] = str(__rclone_retries)
+
+    if __show_progress is not None:
+        __config['show_progress'] = __show_progress
+
+    if __delete_files is not None:
+        __config['delete_files'] = __delete_files
+
+    if __dry_run is not None:
+        __config['dry_run'] = __dry_run
+
     if __smtp_enable is not None:
         __config['smtp_enable'] = __smtp_enable
-    __config['display_unit'] = __display_unit
+
+    if __display_unit is not None:
+        __config['display_unit'] = __display_unit
+
     if __smtp_from is not None:
         __config['smtp_from'] = __smtp_from
+
     if __smtp_to is not None:
         __config['smtp_to'] = __smtp_to
+
     if __smtp_server is not None:
         __config['smtp_server'] = __smtp_server
+
     if __smtp_port is not None:
         __config['smtp_port'] = __smtp_port
+
     if __smtp_user is not None:
         __config['smtp_user'] = __smtp_user
+
     if __smtp_password is not None:
         __config['smtp_password'] = __smtp_password
 
 
 def verify_configuration():
-    logging.debug('verifying configuration')
+    logging.debug('verifying configuration ' + str(__config))
     if __config['smtp_enable'] is True:
         if 'smtp_from' not in __config:
             raise Exception('smtp_from value is None')
@@ -345,7 +394,7 @@ def backup():
         sys.exit(-1)
     local_dir = common.remove_ending_slash(__args[1])
     common.print_line('backing up ' + local_dir + '...')
-    cl_sync.backup(local_dir, __delete_files, __dry_run)
+    cl_sync.backup(local_dir, __config['delete_files'], __config['dry_run'])
 
 
 def restore():
@@ -357,7 +406,7 @@ def restore():
     remote_path = __args[2]
     local_dir = common.remove_ending_slash(__args[1])
     common.print_line('restoring ' + local_dir + ' from ' + remote_path)
-    cl_sync.restore(local_dir, remote_path, __dry_run)
+    cl_sync.restore(local_dir, remote_path, __config['dry_run'])
 
 
 def stats():
@@ -376,13 +425,14 @@ def stats():
                       )
     sizes = cl_sync.get_sizes()
     frees = cl_sync.get_frees()
+    display_unit = __config['display_unit']
     for remote in sizes:
         percent_use = frees[remote] * 100 / sizes[remote]
-        size_d = common.convert_unit(sizes[remote], __display_unit)
-        free_d = common.convert_unit(frees[remote], __display_unit)
+        size_d = common.convert_unit(sizes[remote], display_unit)
+        free_d = common.convert_unit(frees[remote], display_unit)
         common.print_line(remote.ljust(15) + " " +
-                          "{:,}".format(size_d).rjust(19) + __display_unit + " " +
-                          "{:,}".format(free_d).rjust(19) + __display_unit + " " +
+                          "{:,}".format(size_d).rjust(19) + display_unit + " " +
+                          "{:,}".format(free_d).rjust(19) + display_unit + " " +
                           "{:,}".format(int(percent_use)).rjust(10)
                           )
 
@@ -396,11 +446,11 @@ def stats():
                       ''.join('-' for i in range(20)) + " " +
                       ''.join('-' for i in range(10))
                       )
-    size_d = common.convert_unit(size, __display_unit)
-    free_d = common.convert_unit(free, __display_unit)
+    size_d = common.convert_unit(size, display_unit)
+    free_d = common.convert_unit(free, display_unit)
     common.print_line("total:".ljust(15) + " " +
-                      "{:,}".format(size_d).rjust(19) + __display_unit + " " +
-                      "{:,}".format(free_d).rjust(19) + __display_unit + " " +
+                      "{:,}".format(size_d).rjust(19) + display_unit + " " +
+                      "{:,}".format(free_d).rjust(19) + display_unit + " " +
                       "{:,}".format(int(percent_use)).rjust(10)
                       )
 
