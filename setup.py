@@ -12,6 +12,7 @@ __revision__ = "1"
 import os
 from setuptools import setup
 from setuptools import find_packages
+import sprinkle
 
 with open('README.md', 'r') as fh:
     long_description = fh.read()
@@ -24,7 +25,7 @@ def read(name):
 
 setup(
     name='sprinkle-py',
-    version='0.1.1',
+    version=sprinkle.__version__+'.'+sprinkle.__revision__,
     packages=find_packages(exclude=['contrib', 'docs', 'tests']),
     #packages=['sprinkle'],
     #install_requires=read('requirements.txt'),
