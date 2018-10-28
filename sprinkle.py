@@ -28,18 +28,19 @@ def print_heading():
 def usage():
     print("usage: sprinkle.py [options} {command=None} {arg...arg}")
     print("  options:")
-    print("    -h|--help     = help")
-    print("    -c|--conf     = configuration file")
-    print("    -v|--version  = print version")
-    print("    -d|--debug    = debug output")
-    print("    --dist-type   = distribution type (defaults:mas)")
-    print("    --comp-method = compare method [size|md5] (defaults:size)")
-    print("     --rclone-exe = rclone executable (defaults:rclone)")
-    print("    --rclone-conf = rclone configuration (defaults:None)")
-    print("   --display_unit = display unit [G|M|K|B]")
-    print("        --retries = number of retries (default:1)")
-    print("  --show-progress = show progress")
-    print("   --delete-after = delete files on remote end (defaults:false)")
+    print("        -h|--help     = help")
+    print("        -c|--conf     = configuration file")
+    print("        -v|--version  = print version")
+    print("        -d|--debug    = debug output")
+    print("        --dist-type   = distribution type (defaults:mas)")
+    print("        --comp-method = compare method [size|md5] (defaults:size)")
+    print("         --rclone-exe = rclone executable (defaults:rclone)")
+    print("        --rclone-conf = rclone configuration (defaults:None)")
+    print("       --display-unit = display unit [G|M|K|B]")
+    print("            --retries = number of retries (default:1)")
+    print("      --show-progress = show progress")
+    print("       --delete-after = delete files on remote end (defaults:false)")
+    print(" --restore-duplicates = restore files if duplicates are found (default:false)")
     print("        --dry-run = perform a dry run without actually backing up")
     print("  commands:")
     print("         ls = list files")
@@ -99,6 +100,7 @@ def read_args(argv):
     global __rclone_retries
     global __show_progress
     global __delete_files
+    global __restore_duplicates
     global __dry_run
     global __smtp_enable
     global __smtp_from
@@ -118,6 +120,7 @@ def read_args(argv):
     __rclone_retries = None
     __show_progress = None
     __delete_files = None
+    __restore_duplicates = False
     __dry_run = None
     __smtp_enable = None
     __smtp_from = None
@@ -143,6 +146,7 @@ def read_args(argv):
                                     "show-progress",
                                     "dry-run",
                                     "delete-files",
+                                    "restore-duplicates",
                                     "smtp-enable",
                                     "smtp-from=",
                                     "smtp-to=",
@@ -184,6 +188,8 @@ def read_args(argv):
             __show_progress = True
         elif opt in ("--delete-files"):
             __delete_files = True
+        elif opt in ("--restore-duplicates"):
+            __restore_duplicates = True
         elif opt in ("--dry-run"):
             __dry_run = True
         elif opt in ("--smtp-enable"):
@@ -211,23 +217,12 @@ def read_args(argv):
 def configure(config_file):
     global __config
 
-    _default_fields = [
-        "debug",
-        "dry_run",
-        "show_progress",
-        "delete_files",
-        "smtp_enable",
-        "distribution_type",
-        "compare_method",
-        "display_unit",
-        'rclone_retries'
-    ]
-
     _default_values = {
         "debug": False,
         "dry_run": False,
         "show_progress": False,
         "delete_files": True,
+        "restore_duplicates": False,
         "smtp_enable": False,
         "distribution_type": "mas",
         "compare_method": "size",
@@ -241,7 +236,7 @@ def configure(config_file):
     else:
         __config = {}
 
-    for field in _default_fields:
+    for field in _default_values:
         if field not in __config:
             __config[field] = _default_values[field]
 
@@ -405,7 +400,16 @@ def restore():
         sys.exit(-1)
     remote_path = __args[2]
     local_dir = common.remove_ending_slash(__args[1])
-    common.print_line('restoring ' + local_dir + ' from ' + remote_path)
+    if __config['restore_duplicates'] is False:
+        common.print_line('checking if duplicates are present before restoring...')
+        duplicates = cl_sync.remove_duplicates(local_dir, True)
+        if len(duplicates) > 0:
+            common.print_line('DUPLICATE FILES FOUND:')
+            for duplicate in duplicates:
+                common.print_line("\t" + duplicate)
+            common.print_line('restore cannot proceed! Use remove duplicates function before continuing')
+            return
+    common.print_line('restoring ' + remote_path + ' from ' + local_dir)
     cl_sync.restore(local_dir, remote_path, __config['dry_run'])
 
 

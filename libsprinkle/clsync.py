@@ -432,10 +432,11 @@ class ClSync:
     def sync(self, path):
         logging.debug('synchronize path ' + path)
 
-    def remove_duplicates(self, path):
+    def remove_duplicates(self, path, report_only=False):
         files = self.ls(path, True)
         common.print_line('analyzing for duplications...')
         keys = common.sort_dict_keys(files)
+        duplicates = []
         for key in keys:
             if key.endswith(ClSync.duplicate_suffix):
                 logging.debug('found duplicate file: ' + key)
@@ -448,15 +449,22 @@ class ClSync:
                     logging.debug(key + ' is newer than ' + key2)
                     file_to_remove = files[key2].remote + key2
                     common.print_line('found duplicate file. Removing: ' + file_to_remove + '...')
-                    self.delete_file(key2, files[key2].remote)
+                    duplicates.append(key2)
+                    if report_only is False:
+                        self.delete_file(key2, files[key2].remote)
                 elif date1.timestamp() == date1.timestamp():
                     logging.debug(key + ' is equal to ' + key2)
                     file_to_remove = files[key2].remote + key2
                     common.print_line('found duplicate file. Removing: ' + file_to_remove + '...')
-                    self.delete_file(key2, files[key2].remote)
+                    duplicates.append(key2)
+                    if report_only is False:
+                        self.delete_file(key2, files[key2].remote)
                 else:
                     logging.debug(key + ' is older than ' + key2)
                     file_to_remove = files[key].remote + key
                     common.print_line('found duplicate file. Removing: ' + file_to_remove + '...')
-                    self.delete_file(key, files[key].remote)
+                    duplicates.append(key)
+                    if report_only is False:
+                        self.delete_file(key, files[key].remote)
                 logging.debug('file to remove: ' + file_to_remove)
+        return duplicates

@@ -1,8 +1,7 @@
-# Sprinkle
+# Sprinkle (Volume Clustering)
 
-Sprinkle is a volume clustering utility based on [RClone](https://rclone.org). It presents all the
-RClone available volumes as a single clustered volume. It supports 1-way sync mainly for
-backup and recovery.
+Sprinkle is a volume clustering utility. It presents all the RClone available volumes as a single clustered volume. It supports 1-way sync mainly for
+backup and recovery. Sprinkle uses the excellent [RClone](https://rclone.org) software for cloud access.
 
 ## Getting Started
 
@@ -11,16 +10,16 @@ The easiest way to install Sprinkle is via PyPI with:
 pip3 install sprinkle-py
 ```
 
-Via Snap:
-```
-sudo snap install sprinkle
-```
-
 By cloning the repository to your running machine:
 ```
 git clone https://gitlab.com/mmontuori/sprinkle.git
 cd sprinkle
 ./sprinkle.py -c sprinkle.conf ls /
+```
+
+Via Snap:
+```
+sudo snap install sprinkle
 ```
 
 ## Prerequisites
@@ -50,6 +49,18 @@ From this point, backups and restore can be executed on the clustered storage.
 
 ```
 ./sprinkle.py -c {path to sprinkle.conf} backup {directory to backup}
+```
+
+Use the builtin --help utility to get additional commands and information.
+
+```
+./sprinkle.py --help
+```
+
+and the command specific help.
+
+```
+./sprinkle.py {command} --help
 ```
 
 ## Authors
