@@ -56,6 +56,8 @@ class ClSync:
         self._frees = None
         self._show_progress = config['show_progress']
 
+        self._cache = None
+
         if 'rclone_exe' not in self._config:
             self._rclone = rclone.RClone(rclone_config)
         else:
@@ -77,6 +79,9 @@ class ClSync:
 
     def ls(self, file, with_dups=False):
         logging.debug('lsjson of file: ' + file)
+        if self._config['no_cache'] is False and self._cache is not None:
+            logging.debug('serving cached version of file list...')
+            return self._cache
         if not file.startswith('/'):
             file = '/' + file
         files = {}
@@ -111,6 +116,8 @@ class ClSync:
                     key = key + ClSync.duplicate_suffix
                 files[key] = tmp_file
             logging.debug('end of clsync.ls()')
+        if self._config['no_cache'] is False and self._cache is None:
+            self._cache = files
         return files
 
     def lsmd5(self, file):

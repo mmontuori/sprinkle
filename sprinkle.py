@@ -19,7 +19,6 @@ import getopt
 import sys
 import traceback
 
-
 def print_heading():
     print("***********************************************")
     print('* sprinkle the cloud clustered backup utility *')
@@ -41,7 +40,8 @@ def usage():
     print("      --show-progress = show progress")
     print("       --delete-after = delete files on remote end (defaults:false)")
     print(" --restore-duplicates = restore files if duplicates are found (default:false)")
-    print("        --dry-run = perform a dry run without actually backing up")
+    print("            --dry-run = perform a dry run without actually backing up")
+    print("           --no-cache = turn off caching")
     print("  commands:")
     print("         ls = list files")
     print("      lsmd5 = list md5 of files")
@@ -109,6 +109,8 @@ def read_args(argv):
     global __smtp_port
     global __smtp_user
     global __smtp_password
+    global __no_cache
+    global __cl_sync
 
     __configfile = None
     __cmd_debug = None
@@ -129,6 +131,8 @@ def read_args(argv):
     __smtp_port = None
     __smtp_user = None
     __smtp_password = None
+    __no_cache = None
+    __cl_sync = None
 
     try:
         opts, args = getopt.getopt(argv, "dvhc:s:",
@@ -153,7 +157,8 @@ def read_args(argv):
                                     "smtp-server=",
                                     "smtp-port=",
                                     "smtp-user=",
-                                    "smtp-password="
+                                    "smtp-password=",
+                                    "no-cache"
                                     ])
     except getopt.GetoptError:
         usage()
@@ -206,6 +211,8 @@ def read_args(argv):
             __smtp_user = arg
         elif opt in ("--smtp-password"):
             __smtp_password = arg
+        elif opt in ("--no-cache"):
+            __no_cache = True
 
     if len(args) < 1:
         usage()
@@ -224,6 +231,7 @@ def configure(config_file):
         "delete_files": True,
         "restore_duplicates": False,
         "smtp_enable": False,
+        "no_cache": False,
         "distribution_type": "mas",
         "compare_method": "size",
         "display_unit": "G",
@@ -293,6 +301,9 @@ def configure(config_file):
     if __smtp_password is not None:
         __config['smtp_password'] = __smtp_password
 
+    if __no_cache is not None:
+        __config['no_cache'] = __no_cache
+
 
 def verify_configuration():
     logging.debug('verifying configuration ' + str(__config))
@@ -315,12 +326,14 @@ def init_logging(debug):
 
 
 def ls():
-    cl_sync = clsync.ClSync(__config)
+    global __cl_sync
+    if __cl_sync is None:
+        __cl_sync = clsync.ClSync(__config)
     if len(__args) == 1:
         logging.error('invalid ls command')
         usage_ls()
         sys.exit(-1)
-    files = cl_sync.ls(common.remove_ending_slash(__args[1]))
+    files = __cl_sync.ls(common.remove_ending_slash(__args[1]))
     largest_length = 25
     keys = common.sort_dict_keys(files)
     for tmp_file in keys:
@@ -356,12 +369,14 @@ def ls():
                           )
 
 def lsmd5():
-    cl_sync = clsync.ClSync(__config)
+    global __cl_sync
+    if __cl_sync is None:
+        __cl_sync = clsync.ClSync(__config)
     if len(__args) == 1:
         logging.error('invalid ls command')
         usage_lsmd5()
         sys.exit(-1)
-    files = cl_sync.lsmd5(common.remove_ending_slash(__args[1]))
+    files = __cl_sync.lsmd5(common.remove_ending_slash(__args[1]))
     largest_length = 25
     keys = common.sort_dict_keys(files)
     for tmp_file in keys:
@@ -382,19 +397,23 @@ def lsmd5():
                           )
 
 def backup():
-    cl_sync = clsync.ClSync(__config)
+    global __cl_sync
+    if __cl_sync is None:
+        __cl_sync = clsync.ClSync(__config)
     if len(__args) == 1:
         logging.error('invalid backup command')
         usage_backup()
         sys.exit(-1)
     local_dir = common.remove_ending_slash(__args[1])
     common.print_line('backing up ' + local_dir + '...')
-    cl_sync.backup(local_dir, __config['delete_files'], __config['dry_run'])
+    __cl_sync.backup(local_dir, __config['delete_files'], __config['dry_run'])
 
 
 def restore():
-    cl_sync = clsync.ClSync(__config)
-    if len(__args) == 2:
+    global __cl_sync
+    if __cl_sync is None:
+        __cl_sync = clsync.ClSync(__config)
+    if len(__args) < 3:
         logging.error('invalid remote command')
         usage_restore()
         sys.exit(-1)
@@ -402,7 +421,7 @@ def restore():
     local_dir = common.remove_ending_slash(__args[1])
     if __config['restore_duplicates'] is False:
         common.print_line('checking if duplicates are present before restoring...')
-        duplicates = cl_sync.remove_duplicates(local_dir, True)
+        duplicates = __cl_sync.remove_duplicates(local_dir, True)
         if len(duplicates) > 0:
             common.print_line('DUPLICATE FILES FOUND:')
             for duplicate in duplicates:
@@ -410,13 +429,15 @@ def restore():
             common.print_line('restore cannot proceed! Use remove duplicates function before continuing')
             return
     common.print_line('restoring ' + remote_path + ' from ' + local_dir)
-    cl_sync.restore(local_dir, remote_path, __config['dry_run'])
+    __cl_sync.restore(local_dir, remote_path, __config['dry_run'])
 
 
 def stats():
+    global __cl_sync
     logging.debug('display stats about the volumes')
     common.print_line('calculating total and free space...')
-    cl_sync = clsync.ClSync(__config)
+    if __cl_sync is None:
+        __cl_sync = clsync.ClSync(__config)
     common.print_line('REMOTE'.ljust(15) + " " +
                       'SIZE'.rjust(20) + " " +
                       'FREE'.rjust(20) + " " +
@@ -427,8 +448,8 @@ def stats():
                       ''.join('=' for i in range(20)) + " " +
                       ''.join('=' for i in range(10))
                       )
-    sizes = cl_sync.get_sizes()
-    frees = cl_sync.get_frees()
+    sizes = __cl_sync.get_sizes()
+    frees = __cl_sync.get_frees()
     display_unit = __config['display_unit']
     for remote in sizes:
         percent_use = frees[remote] * 100 / sizes[remote]
@@ -440,8 +461,8 @@ def stats():
                           "{:,}".format(int(percent_use)).rjust(10)
                           )
 
-    size = cl_sync.get_size()
-    free = cl_sync.get_free()
+    size = __cl_sync.get_size()
+    free = __cl_sync.get_free()
     logging.debug('size: ' + "{:,}".format(size))
     logging.debug('free: ' + "{:,}".format(free))
     percent_use = free * 100 / size
@@ -460,13 +481,15 @@ def stats():
 
 
 def remove_duplicates():
+    global __cl_sync
     common.print_line('removing duplicates')
-    cl_sync = clsync.ClSync(__config)
+    if __cl_sync is None:
+        __cl_sync = clsync.ClSync(__config)
     if len(__args) == 1:
         logging.error('invalid ls command')
         usage_removedups()
         sys.exit(-1)
-    cl_sync.remove_duplicates(common.remove_ending_slash(__args[1]))
+    __cl_sync.remove_duplicates(common.remove_ending_slash(__args[1]))
 
 
 def main(argv):
