@@ -232,7 +232,8 @@ class ClSync:
 
     def index_local_dir(self, local_dir, exclusion_list=None):
         common.print_line('indexing local directory: ' + local_dir + '...')
-        regexp = re.compile(self.__exclude_regex)
+        if self.__exclude_regex is not None:
+            regexp = re.compile(self.__exclude_regex)
         clfiles = {}
         for root, dirs, files in os.walk(local_dir):
             for name in dirs:

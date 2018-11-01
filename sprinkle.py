@@ -353,6 +353,7 @@ def load_exclusion_file(exclude_file):
             line = line.strip()
             line = line.replace('\\', '/')
             lines.append(line)
+        f.close()
     return lines
 
 
