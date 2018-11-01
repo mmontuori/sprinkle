@@ -7,7 +7,7 @@ __copyright__ = "Copyright 2017 Michael Montuori. All rights reserved."
 __credits__ = ["Warren Crigger"]
 __license__ = "GPLv3"
 __version__ = "0.1"
-__revision__ = "2"
+__revision__ = "3"
 
 import logging
 from libsprinkle import rclone
@@ -18,6 +18,7 @@ from libsprinkle import operation
 from progress.bar import Bar
 import json
 import os
+import re
 
 class ClSync:
 
@@ -55,6 +56,16 @@ class ClSync:
         self._sizes = None
         self._frees = None
         self._show_progress = config['show_progress']
+
+        if '__exclusion_list' in config:
+            self.__exclusion_list = config['__exclusion_list']
+        else:
+            self.__exclusion_list = None
+
+        if 'exclude_regex' in config:
+            self.__exclude_regex = config['exclude_regex']
+        else:
+            self.__exclude_regex = None
 
         self._cache = None
 
@@ -219,13 +230,25 @@ class ClSync:
             logging.error('distribution mode ' + self._distribution_type + ' not supported.')
             raise Exception('unsupported distribution mode ' + self._distribution_type)
 
-    def index_local_dir(self, local_dir):
+    def index_local_dir(self, local_dir, exclusion_list=None):
         common.print_line('indexing local directory: ' + local_dir + '...')
+        regexp = re.compile(self.__exclude_regex)
         clfiles = {}
         for root, dirs, files in os.walk(local_dir):
             for name in dirs:
-                full_path = os.path.join(root, name)
-                # logging.debug('adding ' + full_path + ' to list')
+                full_path = os.path.join(root, name).replace('\\', '/')
+                logging.debug('adding ' + full_path + ' to list')
+                if exclusion_list is not None:
+                    exclusion_found = False
+                    for exclusion in exclusion_list:
+                        if exclusion in full_path:
+                            exclusion_found = True
+                    if exclusion_found is True:
+                        logging.debug('exclusion ' + exclusion + ' applied for path ' + full_path)
+                        continue
+                if self.__exclude_regex is not None and regexp.search(full_path) is not None:
+                    logging.debug('regexp match for path: ' + full_path)
+                    continue
                 tmp_clfile = clfile.ClFile()
                 tmp_clfile.is_dir = True
                 tmp_clfile.path = os.path.dirname(full_path)
@@ -235,7 +258,18 @@ class ClSync:
                 clfiles[common.normalize_path(tmp_clfile.path+'/'+tmp_clfile.name)] = tmp_clfile
             for name in files:
                 full_path = os.path.join(root, name)
-                # logging.debug('adding ' + full_path + ' to list')
+                logging.debug('adding ' + full_path + ' to list')
+                if exclusion_list is not None:
+                    exclusion_found = False
+                    for exclusion in exclusion_list:
+                        if exclusion in full_path:
+                            exclusion_found = True
+                    if exclusion_found is True:
+                        logging.debug('exclusion ' + exclusion + ' applies for ' + full_path)
+                        continue
+                if self.__exclude_regex is not None and regexp.search(full_path) is not None:
+                    logging.debug('regexp match for path: ' + full_path)
+                    continue
                 tmp_clfile = clfile.ClFile()
                 tmp_clfile.is_dir = False
                 tmp_clfile.path = os.path.dirname(full_path)
@@ -248,7 +282,7 @@ class ClSync:
         logging.debug('retrieved ' + str(len(clfiles)) + ' files')
         return clfiles
 
-    def compare_clfiles(self, local_dir, local_clfiles, remote_clfiles, delete_file=False):
+    def compare_clfiles(self, local_dir, local_clfiles, remote_clfiles, delete_file=True):
         common.print_line('calculating differences...')
         logging.debug('comparing clfiles')
         logging.debug('local directory: ' + local_dir)
@@ -319,12 +353,12 @@ class ClSync:
         common.print_line('found ' + str(len(operations)) + ' differences')
         return operations
 
-    def backup(self, local_dir, delete_files=False, dry_run=False):
+    def backup(self, local_dir, delete_files=True, dry_run=False):
         logging.debug('backing up directory ' + local_dir)
         if not common.is_dir(local_dir):
             logging.error("local directory " + local_dir + " not found. Cannot continue!")
             raise Exception("Local directory " + local_dir + " not found")
-        local_clfiles = self.index_local_dir(local_dir)
+        local_clfiles = self.index_local_dir(local_dir, self.__exclusion_list)
         remote_clfiles = self.ls(os.path.basename(local_dir))
         ops = self.compare_clfiles(local_dir, local_clfiles, remote_clfiles, delete_files)
         if len(ops) > 0 and self._show_progress:
@@ -359,7 +393,7 @@ class ClSync:
                                   ' -> ' + op.src.remote + ':' + op.src.remote_path)
                 if dry_run is False:
                     self.copy(op.src.path + '/' + op.src.name, op.src.remote_path, op.src.remote)
-            if op.operation == operation.Operation.REMOVE and delete_files:
+            if op.operation == operation.Operation.REMOVE and delete_files is True:
                 if not self._show_progress:
                     common.print_line('removing ' + op.src.remote+op.src.path)
                 if op.src.is_dir:

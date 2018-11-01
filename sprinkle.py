@@ -7,7 +7,7 @@ __copyright__ = "Copyright 2017 Michael Montuori. All rights reserved."
 __credits__ = ["Warren Crigger"]
 __license__ = "GPLv3"
 __version__ = "0.1"
-__revision__ = "2"
+__revision__ = "3"
 
 from libsprinkle import clsync
 from libsprinkle import rclone
@@ -18,6 +18,7 @@ import logging
 import getopt
 import sys
 import traceback
+import os
 
 def print_heading():
     print("***********************************************")
@@ -31,17 +32,19 @@ def usage():
     print("        -c|--conf     = configuration file")
     print("        -v|--version  = print version")
     print("        -d|--debug    = debug output")
-    print("        --dist-type   = distribution type (defaults:mas)")
-    print("        --comp-method = compare method [size|md5] (defaults:size)")
-    print("         --rclone-exe = rclone executable (defaults:rclone)")
-    print("        --rclone-conf = rclone configuration (defaults:None)")
+    print("        --dist-type   = distribution type (default:mas)")
+    print("        --comp-method = compare method [size|md5] (default:size)")
+    print("         --rclone-exe = rclone executable (default:rclone)")
+    print("        --rclone-conf = rclone configuration (default:None)")
     print("       --display-unit = display unit [G|M|K|B]")
     print("            --retries = number of retries (default:1)")
     print("      --show-progress = show progress")
-    print("       --delete-after = delete files on remote end (defaults:false)")
+    print("    --delete-files = do not delete files on remote end (default:false)")
     print(" --restore-duplicates = restore files if duplicates are found (default:false)")
     print("            --dry-run = perform a dry run without actually backing up")
     print("           --no-cache = turn off caching")
+    print("       --exclude-file = file containing the backup exclude paths")
+    print("      --exclude-regex = regular expression to match for file backup exclusion **TBD**")
     print("  commands:")
     print("         ls = list files")
     print("      lsmd5 = list md5 of files")
@@ -111,6 +114,8 @@ def read_args(argv):
     global __smtp_password
     global __no_cache
     global __cl_sync
+    global __exclude_file
+    global __exclude_regex
 
     __configfile = None
     __cmd_debug = None
@@ -133,6 +138,8 @@ def read_args(argv):
     __smtp_password = None
     __no_cache = None
     __cl_sync = None
+    __exclude_file = None
+    __exclude_regex = None
 
     try:
         opts, args = getopt.getopt(argv, "dvhc:s:",
@@ -158,7 +165,9 @@ def read_args(argv):
                                     "smtp-port=",
                                     "smtp-user=",
                                     "smtp-password=",
-                                    "no-cache"
+                                    "no-cache",
+                                    "exclude-file=",
+                                    "exclude-regex="
                                     ])
     except getopt.GetoptError:
         usage()
@@ -213,6 +222,10 @@ def read_args(argv):
             __smtp_password = arg
         elif opt in ("--no-cache"):
             __no_cache = True
+        elif opt in ("--exclude-file"):
+            __exclude_file = arg
+        elif opt in ("--exclude-regex"):
+            __exclude_regex = arg
 
     if len(args) < 1:
         usage()
@@ -228,7 +241,7 @@ def configure(config_file):
         "debug": False,
         "dry_run": False,
         "show_progress": False,
-        "delete_files": True,
+        "delete_files": False,
         "restore_duplicates": False,
         "smtp_enable": False,
         "no_cache": False,
@@ -304,6 +317,12 @@ def configure(config_file):
     if __no_cache is not None:
         __config['no_cache'] = __no_cache
 
+    if __exclude_file is not None:
+        __config['exclude_file'] = __exclude_file
+
+    if __exclude_regex is not None:
+        __config['exclude_regex'] = __exclude_regex
+
 
 def verify_configuration():
     logging.debug('verifying configuration ' + str(__config))
@@ -316,6 +335,25 @@ def verify_configuration():
             raise Exception('smtp_server value is None')
         if 'smtp_port' not in __config:
             raise Exception('smtp_port value is None')
+
+    if 'exclude_file' in __config and __config['exclude_file'] is not None:
+        if not os.path.isfile(__config['exclude_file']):
+            raise Exception('exclude_file ' + __config['exclude_file'] + ' not found!')
+        global __exclusion_list
+        __exclusion_list = load_exclusion_file(__config['exclude_file'])
+        logging.debug('exclusion list: ' + str(__exclusion_list))
+        __config['__exclusion_list'] = __exclusion_list
+
+
+def load_exclusion_file(exclude_file):
+    logging.debug('loading exclusion file ' + exclude_file)
+    lines = []
+    with open(exclude_file, 'r') as f:
+        for line in f:
+            line = line.strip()
+            line = line.replace('\\', '/')
+            lines.append(line)
+    return lines
 
 
 def init_logging(debug):
