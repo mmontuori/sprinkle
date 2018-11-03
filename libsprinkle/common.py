@@ -100,7 +100,7 @@ def sort_dict_keys(dictionary, reverse=False):
     for key in dictionary:
         logging.debug('appending for sort: ' + key)
         tmp_keys.append(key)
-    tmp_keys.sort(reverse)
+    tmp_keys.sort(reverse=reverse)
     return tmp_keys
 
 
