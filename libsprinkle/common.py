@@ -95,12 +95,12 @@ def convert_unit(amount, unit):
         return amount
 
 
-def sort_dict_keys(dictionary):
+def sort_dict_keys(dictionary, reverse=False):
     tmp_keys = []
     for key in dictionary:
         logging.debug('appending for sort: ' + key)
         tmp_keys.append(key)
-    tmp_keys.sort()
+    tmp_keys.sort(reverse)
     return tmp_keys
 
 

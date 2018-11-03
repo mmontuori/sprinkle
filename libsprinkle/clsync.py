@@ -339,7 +339,8 @@ class ClSync:
                     raise Exception('compare_method: ' + self._compare_method + ' not valid!')
 
         if delete_file is True:
-            for remote_path in remote_clfiles:
+            reverse_keys = common.sort_dict_keys(remote_clfiles, True)
+            for remote_path in reverse_keys:
                 remote_clfile = remote_clfiles[remote_path]
                 logging.debug('checking file ' + remote_dir+remote_path + ' for deletion')
                 rel_name = common.remove_localdir(local_dir, remote_clfile.path + '/' + remote_clfile.name)
