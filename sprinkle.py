@@ -27,13 +27,19 @@ def print_heading():
     print("")
 
 
+def copyrights():
+    print('')
+    print("(C)2018 Michael Montuori, [michael.montuori@gmail.com]. All rights reserved.")
+
+
 def usage_options():
+    print('')
     print("  options:")
-    print("        -h|--help     = help")
-    print("        -c|--conf     = configuration file")
-    print("        -v|--version  = print version")
-    print("        -d|--debug    = debug output")
-    print("        --dist-type   = distribution type (default:mas)")
+    print("            -h|--help = help")
+    print("            -c|--conf = configuration file")
+    print("         -v|--version = print version")
+    print("           -d|--debug = debug output")
+    print("          --dist-type = distribution type (default:mas)")
     print("        --comp-method = compare method [size|md5] (default:size)")
     print("         --rclone-exe = rclone executable (default:rclone)")
     print("        --rclone-conf = rclone configuration (default:None)")
@@ -49,61 +55,77 @@ def usage_options():
 
 
 def usage_commands():
+    print('')
     print("  commands:")
-    print("         ls = list files")
-    print("      lsmd5 = list md5 of files")
-    print("     backup = backup files to clustered drives")
-    print("    restore = restore files from clustered drives")
-    print("      stats = display volume statistics")
-    print(" removedups = removes duplicate files")
-    print("       help = displays the help fot the specific command")
+    print("                   ls = list files")
+    print("                lsmd5 = list md5 of files")
+    print("               backup = backup files to clustered drives")
+    print("              restore = restore files from clustered drives")
+    print("                stats = display volume statistics")
+    print("           removedups = removes duplicate files")
+    print("                 help = displays the help fot the specific command")
 
 
 def usage():
-    print("usage: sprinkle.py [options} {command=None} {arg...arg}")
-    usage_options()
+    print('')
+    print("usage: sprinkle.py [options} {command} {arg...arg}")
     usage_commands()
+    usage_options()
+    copyrights()
 
-\
+
 def usage_ls():
+    print('')
     print("usage: sprinkle.py [options} ls {path}")
     print("       path = the remote path to list files")
     usage_options()
+    copyrights()
 
 
 def usage_lsmd5():
+    print('')
     print("usage: sprinkle.py [options] lsmd5 {path}")
     print("       path = the remote path to list md5")
     usage_options()
+    copyrights()
 
 
 def usage_backup():
+    print('')
     print("usage: sprinkle.py [options] backup {local dir}")
     print("  local dir = the local directory to backup")
     usage_options()
+    copyrights()
 
 
 def usage_restore():
+    print('')
     print("usage: sprinkle.py [options] restore {remote dir} {local dir}")
     print(" remote dir = the remote directory to restore")
     print("  local dir = the location where to store the restore")
     usage_options()
+    copyrights()
 
 
 def usage_help():
+    print('')
     print("usage: sprinkle.py [options] help {command}")
     print("    command = the command to display help for")
 
 
 def usage_stats():
+    print('')
     print("usage: sprinkle.py [options] stats")
     usage_options()
+    copyrights()
 
 
 def usage_removedups():
+    print('')
     print("usage: sprinkle.py [options] removedups [path]")
     print("      path = the path to calculate duplicates")
     usage_options()
+    copyrights()
 
 
 def print_version():
