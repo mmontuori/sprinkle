@@ -20,13 +20,14 @@ import sys
 import traceback
 import os
 
-def print_heading():
-    print("***********************************************")
-    print('* sprinkle the cloud clustered backup utility *')
-    print("***********************************************")
 
-def usage():
-    print("usage: sprinkle.py [options} {command=None} {arg...arg}")
+def print_heading():
+    print("")
+    print('sprinkle : the cloud clustered backup utility')
+    print("")
+
+
+def usage_options():
     print("  options:")
     print("        -h|--help     = help")
     print("        -c|--conf     = configuration file")
@@ -39,12 +40,15 @@ def usage():
     print("       --display-unit = display unit [G|M|K|B]")
     print("            --retries = number of retries (default:1)")
     print("      --show-progress = show progress")
-    print("    --delete-files = do not delete files on remote end (default:false)")
+    print("       --delete-files = do not delete files on remote end (default:false)")
     print(" --restore-duplicates = restore files if duplicates are found (default:false)")
     print("            --dry-run = perform a dry run without actually backing up")
     print("           --no-cache = turn off caching")
     print("       --exclude-file = file containing the backup exclude paths")
     print("      --exclude-regex = regular expression to match for file backup exclusion **TBD**")
+
+
+def usage_commands():
     print("  commands:")
     print("         ls = list files")
     print("      lsmd5 = list md5 of files")
@@ -52,36 +56,54 @@ def usage():
     print("    restore = restore files from clustered drives")
     print("      stats = display volume statistics")
     print(" removedups = removes duplicate files")
+    print("       help = displays the help fot the specific command")
 
 
+def usage():
+    print("usage: sprinkle.py [options} {command=None} {arg...arg}")
+    usage_options()
+    usage_commands()
+
+\
 def usage_ls():
-    print("usage: sprinkle.py {-c|--conf <config file>} ls {pattern}")
-    print("*** TO BE FINISHED ***")
+    print("usage: sprinkle.py [options} ls {path}")
+    print("       path = the remote path to list files")
+    usage_options()
 
 
 def usage_lsmd5():
-    print("usage: sprinkle.py {-c|--conf <config file>} lsmd5 {pattern}")
-    print("*** TO BE FINISHED ***")
+    print("usage: sprinkle.py [options] lsmd5 {path}")
+    print("       path = the remote path to list md5")
+    usage_options()
 
 
 def usage_backup():
-    print("usage: sprinkle.py {-c|--conf <config file>} backup {local dir}")
-    print("*** TO BE FINISHED ***")
+    print("usage: sprinkle.py [options] backup {local dir}")
+    print("  local dir = the local directory to backup")
+    usage_options()
 
 
 def usage_restore():
-    print("usage: sprinkle.py {-c|--conf <config file>} restore {remote dir} {local dir}")
-    print("*** TO BE FINISHED ***")
+    print("usage: sprinkle.py [options] restore {remote dir} {local dir}")
+    print(" remote dir = the remote directory to restore")
+    print("  local dir = the location where to store the restore")
+    usage_options()
+
+
+def usage_help():
+    print("usage: sprinkle.py [options] help {command}")
+    print("    command = the command to display help for")
 
 
 def usage_stats():
-    print("usage: sprinkle.py {-c|--conf <config file>} stats")
-    print("*** TO BE FINISHED ***")
+    print("usage: sprinkle.py [options] stats")
+    usage_options()
 
 
 def usage_removedups():
-    print("usage: sprinkle.py {-c|--conf <config file>} removedups [pattern]")
-    print("*** TO BE FINISHED ***")
+    print("usage: sprinkle.py [options] removedups [path]")
+    print("      path = the path to calculate duplicates")
+    usage_options()
 
 
 def print_version():
@@ -570,6 +592,24 @@ def main(argv):
         stats()
     elif __args[0] == 'removedups':
         remove_duplicates()
+    elif __args[0] == 'help':
+        if len(__args) < 2:
+            usage_help()
+        else:
+            if __args[1] == 'ls':
+                usage_ls()
+            if __args[1] == 'lsmd5':
+                usage_lsmd5()
+            if __args[1] == 'backup':
+                usage_backup()
+            if __args[1] == 'restore':
+                usage_restore()
+            if __args[1] == 'stats':
+                usage_stats()
+            if __args[1] == 'removedups':
+                usage_removedups()
+
+        quit()
     else:
         logging.error('invalid command')
         usage()
