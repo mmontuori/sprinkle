@@ -24,7 +24,6 @@ import os
 def print_heading():
     print("")
     print('sprinkle : the cloud clustered backup utility')
-    print("")
 
 
 def copyrights():
@@ -67,6 +66,8 @@ def usage_commands():
 
 
 def usage():
+    print_heading()
+    version()
     print('')
     print("usage: sprinkle.py [options} {command} {arg...arg}")
     usage_commands()
@@ -75,6 +76,8 @@ def usage():
 
 
 def usage_ls():
+    print_heading()
+    version()
     print('')
     print("usage: sprinkle.py [options} ls {path}")
     print("       path = the remote path to list files")
@@ -83,6 +86,8 @@ def usage_ls():
 
 
 def usage_lsmd5():
+    print_heading()
+    version()
     print('')
     print("usage: sprinkle.py [options] lsmd5 {path}")
     print("       path = the remote path to list md5")
@@ -91,6 +96,8 @@ def usage_lsmd5():
 
 
 def usage_backup():
+    print_heading()
+    version()
     print('')
     print("usage: sprinkle.py [options] backup {local dir}")
     print("  local dir = the local directory to backup")
@@ -99,6 +106,8 @@ def usage_backup():
 
 
 def usage_restore():
+    print_heading()
+    version()
     print('')
     print("usage: sprinkle.py [options] restore {remote dir} {local dir}")
     print(" remote dir = the remote directory to restore")
@@ -108,12 +117,16 @@ def usage_restore():
 
 
 def usage_help():
+    print_heading()
+    version()
     print('')
     print("usage: sprinkle.py [options] help {command}")
     print("    command = the command to display help for")
 
 
 def usage_stats():
+    print_heading()
+    version()
     print('')
     print("usage: sprinkle.py [options] stats")
     usage_options()
@@ -121,6 +134,8 @@ def usage_stats():
 
 
 def usage_removedups():
+    print_heading()
+    version()
     print('')
     print("usage: sprinkle.py [options] removedups [path]")
     print("      path = the path to calculate duplicates")
@@ -128,10 +143,10 @@ def usage_removedups():
     copyrights()
 
 
-def print_version():
-    print("sprinkle version: " + __version__ + '.' + __revision__)
-    print("sprinkle module version: " + clsync.__version__ + '.' + clsync.__revision__)
-    print("rclone module version: " + rclone.__version__ + '.' + rclone.__revision__)
+def version():
+    print("version: " + __version__ + '.' + __revision__ +
+          ", module version: " + clsync.__version__ + '.' + clsync.__revision__ +
+          ", rclone module version: " + rclone.__version__ + '.' + rclone.__revision__)
 
 
 def read_args(argv):
@@ -222,7 +237,7 @@ def read_args(argv):
             usage()
             sys.exit(0)
         elif opt in ('-v', '--version'):
-            print_version()
+            version()
             sys.exit(0)
         elif opt in ("-c", "--conf"):
             __configfile = arg
@@ -456,7 +471,7 @@ def lsmd5():
     if __cl_sync is None:
         __cl_sync = clsync.ClSync(__config)
     if len(__args) == 1:
-        logging.error('invalid ls command')
+        logging.error('invalid lsmd5 command')
         usage_lsmd5()
         sys.exit(-1)
     files = __cl_sync.lsmd5(common.remove_ending_slash(__args[1]))
@@ -569,7 +584,7 @@ def remove_duplicates():
     if __cl_sync is None:
         __cl_sync = clsync.ClSync(__config)
     if len(__args) == 1:
-        logging.error('invalid ls command')
+        logging.error('invalid removedups command')
         usage_removedups()
         sys.exit(-1)
     __cl_sync.remove_duplicates(common.remove_ending_slash(__args[1]))
@@ -581,8 +596,6 @@ def main(argv):
     configure(__configfile)
     verify_configuration()
     logging.debug('config: ' + str(__config))
-
-    print_heading()
 
     if __args[0] == 'ls':
         ls()
@@ -630,11 +643,15 @@ def main(argv):
                 usage_stats()
             if __args[1] == 'removedups':
                 usage_removedups()
+            else:
+                print('')
+                print('invalid command. Use help [command]')
+                sys.exit(-1)
 
         quit()
     else:
-        logging.error('invalid command')
-        usage()
+        print('')
+        print('invalid command. Use help [command]')
         sys.exit(-1)
 
 
