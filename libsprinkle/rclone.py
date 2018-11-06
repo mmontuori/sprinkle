@@ -22,7 +22,7 @@ class RClone:
             logging.error("configuration file " + str(config_file) + " not found. Cannot continue!")
             raise Exception("Configuration file " + str(config_file) + " not found")
         if rclone_exe is not "rclone" and not common.is_file(rclone_exe):
-            logging.error("rclone executable " + str(rclone_exe) + " not found. Cannot continue!")
+            #logging.error("rclone executable " + str(rclone_exe) + " not found. Cannot continue!")
             common.print_line('RCLONE.EXE not in PATH. Put it in PATH or modify libsprinkle.conf to point to it.')
             raise Exception("rclone executable " + str(rclone_exe) + " not found")
         self._config_file = config_file
@@ -46,7 +46,6 @@ class RClone:
         logging.debug('result: ' + str(result))
         if result['code'] == -20:
             logging.error("rclone executable not found. Please make sure it's in the PATH or in the config file")
-            common.print_line("rclone executable not found. Please make sure it's in the PATH or in the config file")
             raise Exception("rclone executable not found. Please make sure it's in the PATH or in the config file")
         if result['error'] is not '':
             logging.error('error getting remotes objects')

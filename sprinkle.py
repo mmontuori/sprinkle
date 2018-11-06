@@ -370,6 +370,7 @@ def read_args(argv):
     global __cl_sync
     global __exclude_file
     global __exclude_regex
+    global __log_file
 
     __configfile = None
     __cmd_debug = None
@@ -394,6 +395,7 @@ def read_args(argv):
     __cl_sync = None
     __exclude_file = None
     __exclude_regex = None
+    __log_file = None
 
     try:
         opts, args = getopt.getopt(argv, "dvhc:s:",
@@ -421,7 +423,8 @@ def read_args(argv):
                                     "smtp-password=",
                                     "no-cache",
                                     "exclude-file=",
-                                    "exclude-regex="
+                                    "exclude-regex=",
+                                    "log-file="
                                     ])
     except getopt.GetoptError:
         usage()
@@ -480,6 +483,8 @@ def read_args(argv):
             __exclude_file = arg
         elif opt in ("--exclude-regex"):
             __exclude_regex = arg
+        elif opt in ("--log-file"):
+            __log_file = arg
 
     if len(args) < 1:
         usage()
@@ -502,7 +507,8 @@ def configure(config_file):
         "distribution_type": "mas",
         "compare_method": "size",
         "display_unit": "G",
-        "rclone_retries": '1'
+        "rclone_retries": '1',
+        "log_file": None
     }
 
     if config_file is not None:
@@ -577,6 +583,9 @@ def configure(config_file):
     if __exclude_regex is not None:
         __config['exclude_regex'] = __exclude_regex
 
+    if __log_file is not None:
+        __config['log_file'] = __log_file
+
 
 def verify_configuration():
     logging.debug('verifying configuration ' + str(__config))
@@ -613,8 +622,15 @@ def load_exclusion_file(exclude_file):
 
 def init_logging(debug):
     if debug is True:
+        logging.basicConfig(format='%(asctime)s %(message)s',
+                            datefmt='%m/%d/%Y %I:%M:%S %p',
+                            level=logging.INFO,
+                            filename=__log_file)
         logging.getLogger().setLevel(logging.DEBUG)
     else:
+        logging.basicConfig(format='%(message)s',
+                            level=logging.INFO,
+                            filename=__log_file)
         logging.getLogger().setLevel(logging.INFO)
 
 
@@ -786,71 +802,75 @@ def remove_duplicates():
 
 
 def main(argv):
-    logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
     read_args(argv)
     configure(__configfile)
     verify_configuration()
     logging.debug('config: ' + str(__config))
 
-    if __args[0] == 'ls':
-        ls()
-    elif __args[0] == 'lsmd5':
-        lsmd5()
-    elif __args[0] == 'backup':
-        try:
-            backup()
-        except Exception as e:
-            if __config['smtp_enable'] is True:
-                logging.info('sending email')
-                email = smtp_email.EMail()
-                email.set_from(__config['smtp_from'])
-                email.set_to(__config['smtp_to'])
-                email.set_smtp_server(__config['smtp_server'])
-                email.set_smtp_port(__config['smtp_port'])
-                if 'smtp_user' in __config:
-                    email.set_smtp_user(__config['smtp_user'])
-                if 'smtp_password' in __config:
-                    email.set_smtp_password(__config['smtp_password'])
-                email.set_subject('Sprinkle Failure Notification')
-                email.set_message('Sprinkle has experienced the following error:\n\n' + str(e) +
-                                  '\n\nExamine logs for additional information')
-                email.send()
-            traceback.print_exc(file=sys.stderr)
-    elif __args[0] == 'restore':
-        restore()
-    elif __args[0] == 'stats':
-        stats()
-    elif __args[0] == 'removedups':
-        remove_duplicates()
-    elif __args[0] == 'help':
-        if len(__args) < 2:
-            usage_help()
-        else:
-            if __args[1] == 'ls':
-                usage_ls()
-            elif __args[1] == 'lsmd5':
-                usage_lsmd5()
-            elif __args[1] == 'backup':
-                usage_backup()
-            elif __args[1] == 'restore':
-                usage_restore()
-            elif __args[1] == 'stats':
-                usage_stats()
-            elif __args[1] == 'removedups':
-                usage_removedups()
-            elif __args[1] == 'config':
-                usage_config()
+    if __log_file is not None:
+        print('sprinkle is logging to file ' + __log_file + '...')
+    try:
+        if __args[0] == 'ls':
+            ls()
+        elif __args[0] == 'lsmd5':
+            lsmd5()
+        elif __args[0] == 'backup':
+            try:
+                backup()
+            except Exception as e:
+                if __config['smtp_enable'] is True:
+                    logging.info('sending email')
+                    email = smtp_email.EMail()
+                    email.set_from(__config['smtp_from'])
+                    email.set_to(__config['smtp_to'])
+                    email.set_smtp_server(__config['smtp_server'])
+                    email.set_smtp_port(__config['smtp_port'])
+                    if 'smtp_user' in __config:
+                        email.set_smtp_user(__config['smtp_user'])
+                    if 'smtp_password' in __config:
+                        email.set_smtp_password(__config['smtp_password'])
+                    email.set_subject('Sprinkle Failure Notification')
+                    email.set_message('Sprinkle has experienced the following error:\n\n' + str(e) +
+                                      '\n\nExamine logs for additional information')
+                    email.send()
+                raise e
+        elif __args[0] == 'restore':
+            restore()
+        elif __args[0] == 'stats':
+            stats()
+        elif __args[0] == 'removedups':
+            remove_duplicates()
+        elif __args[0] == 'help':
+            if len(__args) < 2:
+                usage_help()
             else:
-                print('')
-                print('invalid command. Use help [command]')
-                sys.exit(-1)
+                if __args[1] == 'ls':
+                    usage_ls()
+                elif __args[1] == 'lsmd5':
+                    usage_lsmd5()
+                elif __args[1] == 'backup':
+                    usage_backup()
+                elif __args[1] == 'restore':
+                    usage_restore()
+                elif __args[1] == 'stats':
+                    usage_stats()
+                elif __args[1] == 'removedups':
+                    usage_removedups()
+                elif __args[1] == 'config':
+                    usage_config()
+                else:
+                    print('')
+                    print('invalid command. Use help [command]')
+                    sys.exit(-1)
 
-        quit()
-    else:
-        print('')
-        print('invalid command. Use help [command]')
-        sys.exit(-1)
-
+            quit()
+        else:
+            print('')
+            print('invalid command. Use help [command]')
+            sys.exit(-1)
+    except Exception as e:
+        if __cmd_debug is True:
+            traceback.print_exc(file=sys.stderr)
 
 if __name__ == "__main__":
     # execute only if run as a script

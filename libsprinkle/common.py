@@ -73,7 +73,7 @@ def execute(command_with_args, no_error=False):
 
 
 def print_line(line):
-    print(line)
+    logging.info(line)
 
 
 def remove_ending_slash(path):
