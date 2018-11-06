@@ -60,23 +60,24 @@ CREDITS:
 def usage_options():
     """
 OPTIONS:
-    -h, --help                 help
-    -c, --conf                 configuration file
-    -v, --version              print version
-    -d, --debug                debug output
-    --dist-type                distribution type (default:mas)
-    --comp-method              compare method [size|md5] (default:size)
-    --rclone-exe               rclone executable (default:rclone)
-    --rclone-conf              rclone configuration (default:None)
-    --display-unit             display unit [G|M|K|B]
-    --retries                  number of retries (default:1)
-    --show-progress            show progress
-    --delete-files             do not delete files on remote end (default:false)
-    --restore-duplicates       restore files if duplicates are found (default:false)
-    --dry-run                  perform a dry run without actually backing up
-    --no-cache                 turn off caching
-    --exclude-file             file containing the backup exclude paths
-    --exclude-regex            regular expression to match for file backup exclusion **TBD**
+    -h, --help                   help
+    -c, --conf {config file}     configuration file
+    -v, --version                print version
+    -d, --debug                  debug output
+    --dist-type {mas}            distribution type (default:mas)
+    --comp-method {size|md5}     compare method [size|md5] (default:size)
+    --rclone-exe {rclone_exe}    rclone executable (default:rclone)
+    --rclone-conf {config file}  rclone configuration (default:None)
+    --display-unit {G|M|K|B}     display unit (G)igabytes, (M)egabytes, (K)ilobytes, or (B)ites
+    --retries {num_retries}      number of retries (default:1)
+    --show-progress              show progress
+    --delete-files               do not delete files on remote end (default:false)
+    --restore-duplicates         restore files if duplicates are found (default:false)
+    --dry-run                    perform a dry run without actually backing up
+    --no-cache                   turn off caching
+    --exclude-file {file}        file containing the backup exclude paths
+    --exclude-regex {regex}      regular expression to match for file backup exclusion
+    --log-file {file}            logs output to the specified file
     """
     return
 
@@ -84,14 +85,14 @@ OPTIONS:
 def usage_commands():
     """
 COMMANDS:
-    config                     configure rclone to access volumes
-    ls                         list files
-    lsmd5                      list md5 of files
-    backup                     backup files to clustered drives
-    restore                    restore files from clustered drives
-    stats                      display volume statistics
-    removedups                 removes duplicate files
-    help                       displays the help fot the specific command
+    config                       configure rclone to access volumes
+    ls                           list files
+    lsmd5                        list md5 of files
+    backup                       backup files to clustered drives
+    restore                      restore files from clustered drives
+    stats                        display volume statistics
+    removedups                   removes duplicate files
+    help                         displays the help fot the specific command
     """
     return
 
