@@ -5,12 +5,12 @@ backup and recovery. Sprinkle uses the excellent [RClone](https://rclone.org) so
 
 ## Getting Started
 
-The easiest way to install Sprinkle is via PyPI with:
+The easiest way to install Sprinkle and all prerequisites is via PyPI with:
 ```
 pip3 install sprinkle-py
 ```
 
-By cloning the repository to your running machine:
+Or by cloning the repository to your running machine, but make sure prerequisites are met:
 ```
 git clone https://gitlab.com/mmontuori/sprinkle.git
 cd sprinkle
@@ -25,23 +25,26 @@ sudo snap install sprinkle
 ## Prerequisites
 
 * Python 3 installed
-* RClone installed and available in the PATH or configured in sprinkle.conf file.
-  [https://rclone.org](https://rclone.org) for reference.
+* FileLock Python library [https://pypi.org/project/filelock](https://pypi.org/project/filelock)
+* Progress Python library [https://pypi.org/project/progress](https://pypi.org/project/progress)
+* RClone installed and available in the PATH or configured in sprinkle.conf file. RClone documentation
+is available [here](https://rclone.org) for reference
 * Few storage drives available from the supported RClone drives
 
 ## Installing
 
 Following are the installation steps:
 
-* Install Sprinkle with a supported methos
+* Install Sprinkle with a supported method
 * Download and install RCLone from [https://rclone.org](https://rclone.org)
-* Run rclone config to configure and authorize your cloud or local storage
+* Run **RClone** config to configure and authorize your cloud or local storage
   (you might want to run the program on a machione for which http://localhost can be reached
   ideally, from your local workstation)
 * Verify access to the storage by issuing the command "rclone ls {alias name}:"
 * Copy rclone.conf on the machine which will execute Sprinkle
 * Make sure all the prerequisites are satisfied
-* From Sprinkle installation directory run "./sprinkle.py -c {path to sprinkle.conf} ls /"
+* Add **RClone** executable to the system PATH variable, or configure location in sprinkle.conf file
+* From Sprinkle installation directory run **"./sprinkle.py -c {path to sprinkle.conf} ls /"**
 
 From this point, backups and restore can be executed on the clustered storage.
 
