@@ -20,6 +20,10 @@ import getopt
 import sys
 import traceback
 import os
+from filelock import Timeout, FileLock
+
+
+lock = FileLock("sprinkle.lock", timeout=1)
 
 
 def warranty():
@@ -78,6 +82,7 @@ OPTIONS:
     --exclude-file {file}        file containing the backup exclude paths
     --exclude-regex {regex}      regular expression to match for file backup exclusion
     --log-file {file}            logs output to the specified file
+    --single-instance            make sure only 1 concurrent instance of sprinkle is running (default:False)
     """
     return
 
@@ -372,6 +377,7 @@ def read_args(argv):
     global __exclude_file
     global __exclude_regex
     global __log_file
+    global __single_instance
 
     __configfile = None
     __cmd_debug = None
@@ -397,6 +403,7 @@ def read_args(argv):
     __exclude_file = None
     __exclude_regex = None
     __log_file = None
+    __single_instance = None
 
     try:
         opts, args = getopt.getopt(argv, "dvhc:s:",
@@ -425,7 +432,8 @@ def read_args(argv):
                                     "no-cache",
                                     "exclude-file=",
                                     "exclude-regex=",
-                                    "log-file="
+                                    "log-file=",
+                                    "single-instance"
                                     ])
     except getopt.GetoptError:
         usage()
@@ -486,6 +494,8 @@ def read_args(argv):
             __exclude_regex = arg
         elif opt in ("--log-file"):
             __log_file = arg
+        elif opt in ("--single-instance"):
+            __single_instance = True
 
     if len(args) < 1:
         usage()
@@ -509,7 +519,8 @@ def configure(config_file):
         "compare_method": "size",
         "display_unit": "G",
         "rclone_retries": '1',
-        "log_file": None
+        "log_file": None,
+        "single_instance": False
     }
 
     if config_file is not None:
@@ -587,6 +598,9 @@ def configure(config_file):
     if __log_file is not None:
         __config['log_file'] = __log_file
 
+    if __single_instance is not None:
+        __config['single_instance'] = __single_instance
+
 
 def verify_configuration():
     logging.debug('verifying configuration ' + str(__config))
@@ -625,14 +639,14 @@ def init_logging(debug):
     if debug is True:
         logging.basicConfig(format='%(asctime)s %(message)s',
                             datefmt='%m/%d/%Y %I:%M:%S %p',
-                            level=logging.INFO,
+                            level=logging.DEBUG,
                             filename=__log_file)
-        logging.getLogger().setLevel(logging.DEBUG)
+        logging.getLogger('sprinkle').setLevel(logging.DEBUG)
     else:
         logging.basicConfig(format='%(message)s',
                             level=logging.INFO,
                             filename=__log_file)
-        logging.getLogger().setLevel(logging.INFO)
+        logging.getLogger('sprinkle').setLevel(logging.INFO)
 
 
 def ls():
@@ -802,10 +816,20 @@ def remove_duplicates():
     __cl_sync.remove_duplicates(common.remove_ending_slash(__args[1]))
 
 
+def check_single_instance():
+    if __single_instance is not None and __single_instance is True:
+        try:
+            lock.acquire(timeout=1)
+        except Timeout:
+            logging.error('sprinkle is running in another instance!')
+            sys.exit(-1)
+
+
 def main(argv):
     read_args(argv)
     configure(__configfile)
     verify_configuration()
+    check_single_instance()
     logging.debug('config: ' + str(__config))
 
     if __log_file is not None:
