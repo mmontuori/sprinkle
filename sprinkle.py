@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-libsprinkle main module
+sprinkle : the cloud clustered backup utility
 """
 __author__ = "Michael Montuori [michael.montuori@gmail.com]"
 __copyright__ = "Copyright 2017 Michael Montuori. All rights reserved."
@@ -8,6 +8,7 @@ __credits__ = ["Warren Crigger"]
 __license__ = "GPLv3"
 __version__ = "0.1"
 __revision__ = "3"
+__docformat__ = "reStructuredText"
 
 from libsprinkle import clsync
 from libsprinkle import rclone
@@ -21,130 +22,324 @@ import traceback
 import os
 
 
-def print_heading():
-    print("")
-    print('sprinkle : the cloud clustered backup utility')
+def warranty():
+    """
+WARRANTY:
+    THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+    THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
+    SHALL THE APACHE SOFTWARE FOUNDATION OR ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+    SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+    OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+    LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
+    WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+    """
+
+
+def authors():
+    """
+AUTHOR:
+    Michael Montuori, [michael.montuori@gmail.com]
+    """
 
 
 def copyrights():
-    print('')
-    print("(C)2018 Michael Montuori, [michael.montuori@gmail.com]. All rights reserved.")
+    """
+COPYRIGHT:
+    (C)2018 Michael Montuori, [michael.montuori@gmail.com]. All rights reserved.
+    """
+    return
+
+
+def credits():
+    """
+CREDITS:
+    Warren Crigger for development and testing support
+    """
 
 
 def usage_options():
-    print('')
-    print("  options:")
-    print("            -h|--help = help")
-    print("            -c|--conf = configuration file")
-    print("         -v|--version = print version")
-    print("           -d|--debug = debug output")
-    print("          --dist-type = distribution type (default:mas)")
-    print("        --comp-method = compare method [size|md5] (default:size)")
-    print("         --rclone-exe = rclone executable (default:rclone)")
-    print("        --rclone-conf = rclone configuration (default:None)")
-    print("       --display-unit = display unit [G|M|K|B]")
-    print("            --retries = number of retries (default:1)")
-    print("      --show-progress = show progress")
-    print("       --delete-files = do not delete files on remote end (default:false)")
-    print(" --restore-duplicates = restore files if duplicates are found (default:false)")
-    print("            --dry-run = perform a dry run without actually backing up")
-    print("           --no-cache = turn off caching")
-    print("       --exclude-file = file containing the backup exclude paths")
-    print("      --exclude-regex = regular expression to match for file backup exclusion **TBD**")
+    """
+OPTIONS:
+    -h, --help                 help
+    -c, --conf                 configuration file
+    -v, --version              print version
+    -d, --debug                debug output
+    --dist-type                distribution type (default:mas)
+    --comp-method              compare method [size|md5] (default:size)
+    --rclone-exe               rclone executable (default:rclone)
+    --rclone-conf              rclone configuration (default:None)
+    --display-unit             display unit [G|M|K|B]
+    --retries                  number of retries (default:1)
+    --show-progress            show progress
+    --delete-files             do not delete files on remote end (default:false)
+    --restore-duplicates       restore files if duplicates are found (default:false)
+    --dry-run                  perform a dry run without actually backing up
+    --no-cache                 turn off caching
+    --exclude-file             file containing the backup exclude paths
+    --exclude-regex            regular expression to match for file backup exclusion **TBD**
+    """
+    return
 
 
 def usage_commands():
-    print('')
-    print("  commands:")
-    print("                   ls = list files")
-    print("                lsmd5 = list md5 of files")
-    print("               backup = backup files to clustered drives")
-    print("              restore = restore files from clustered drives")
-    print("                stats = display volume statistics")
-    print("           removedups = removes duplicate files")
-    print("                 help = displays the help fot the specific command")
-
+    """
+COMMANDS:
+    config                     configure rclone to access volumes
+    ls                         list files
+    lsmd5                      list md5 of files
+    backup                     backup files to clustered drives
+    restore                    restore files from clustered drives
+    stats                      display volume statistics
+    removedups                 removes duplicate files
+    help                       displays the help fot the specific command
+    """
+    return
 
 def usage():
-    print_heading()
+    """
+NAME:
+    sprinkle - the cloud clustered backup utility
+
+SYNOPSIS:
+    sprinkle.py [options} {command} {arg...arg}
+
+DESCRIPTION:
+    Sprinkle is a volume clustering utility. It presents all the RClone available volumes as a single clustered volume.
+    It supports 1-way sync mainly for backup and recovery.
+    Sprinkle uses the excellent [RClone](https://rclone.org) software for cloud volume access.
+
+EXAMPLES:
+    sprinkle.py ls /backup
+    sprinkle.py backup /dir_to_backup
+    sprinkle.py restore /backup /opt/restore_dir
+    sprinkle.py stats
+    sprinkle.py -c /home/sprinkle/sprinkle.conf ls /backup
+    """
+    print(usage.__doc__)
     version()
-    print('')
-    print("usage: sprinkle.py [options} {command} {arg...arg}")
-    usage_commands()
-    usage_options()
-    copyrights()
+    print(usage_commands.__doc__)
+    print(usage_options.__doc__)
+    print(authors.__doc__)
+    print(copyrights.__doc__)
+    print(credits.__doc__)
+    print(warranty.__doc__)
+
+
+def usage_config():
+    """
+NAME:
+    sprinkle config - configure sprinkle/rclone
+
+SYNOPSIS:
+    sprinkle.py [options] config
+
+DESCRIPTION:
+    Configure sprinkle/rclone to communicate with remote volumes. This process might enable API access and may
+    require authorization before sprinkle/rclone can access the drives. For config documentation refer to rclone
+    documentation at https://rclone.org/docs/.
+
+EXAMPLES:
+    sprinkle.py config
+    """
+    print(usage_ls.__doc__)
+    print(usage_options.__doc__)
+    print(copyrights.__doc__)
+    print(credits.__doc__)
 
 
 def usage_ls():
-    print_heading()
-    version()
-    print('')
-    print("usage: sprinkle.py [options} ls {path}")
-    print("       path = the remote path to list files")
-    usage_options()
-    copyrights()
+    """
+NAME:
+    sprinkle ls - List files on remote volumes
+
+SYNOPSIS:
+    sprinkle.py [options] ls {path}
+
+DESCRIPTION:
+    List files on the remote drive. The output generated by the command looks like:
+
+    --- NAME                                                                  SIZE MOD TIME            REMOTE
+    --- ---------------------------------------------------------------- --------- ------------------- ---------------
+    -d- /backup/directory                                                       -1 2018-10-21:00:18:53 volume1:
+    --- /backup/directory/file.txt                                            8580 2018-10-21:00:17:28 volume1:
+
+    -d- indicates that the file is a directory and --- indicates a regular file
+
+ARGUMENTS:
+    path
+        the remote path to list files
+
+EXAMPLES:
+    sprinkle.py ls /backup
+    sprinkle.py ls /
+    """
+    print(usage_ls.__doc__)
+    print(usage_options.__doc__)
+    print(copyrights.__doc__)
+    print(credits.__doc__)
 
 
 def usage_lsmd5():
-    print_heading()
-    version()
-    print('')
-    print("usage: sprinkle.py [options] lsmd5 {path}")
-    print("       path = the remote path to list md5")
-    usage_options()
-    copyrights()
+    """
+NAME:
+    sprinkle lsmd5 - List file MD5 hash on remote volumes
+
+SYNOPSIS:
+    sprinkle.py [options] lsmd5 {path}
+
+DESCRIPTION:
+    List files on the remote drive with the respective MD5 hash. The output generated by the command looks like:
+
+    NAME                                                             MD5
+    ---------------------------------------------------------------- --------------------------------
+    /backup/directory/file1.txt                                      92de4cde16da896dcc6289b92df42976
+    /backup/directory/file2.txt                                      86efff36b7b0df257f1779d974c8101b
+
+ARGUMENTS:
+    path
+        the remote path to list files
+
+EXAMPLES:
+    sprinkle.py lsmd5 /backup
+    sprinkle.py lsmd5 /
+    """
+    print(usage_lsmd5.__doc__)
+    print(usage_options.__doc__)
+    print(copyrights.__doc__)
+    print(credits.__doc__)
 
 
 def usage_backup():
-    print_heading()
-    version()
-    print('')
-    print("usage: sprinkle.py [options] backup {local dir}")
-    print("  local dir = the local directory to backup")
-    usage_options()
-    copyrights()
+    """
+NAME:
+    sprinkle backup - backs up the local directory to remote volumes
+
+SYNOPSIS:
+    sprinkle.py [options] backup {local dir}
+
+DESCRIPTION:
+    Backs up the local directory to the remote drives configured in rclone.
+
+ARGUMENTS:
+    local dir
+        the local directory to backup
+
+EXAMPLES:
+    sprinkle.py backup /backup
+    """
+    print(usage_backup.__doc__)
+    print(usage_options.__doc__)
+    print(copyrights.__doc__)
+    print(credits.__doc__)
 
 
 def usage_restore():
-    print_heading()
-    version()
-    print('')
-    print("usage: sprinkle.py [options] restore {remote dir} {local dir}")
-    print(" remote dir = the remote directory to restore")
-    print("  local dir = the location where to store the restore")
-    usage_options()
-    copyrights()
+    """
+NAME:
+    sprinkle restores - restore files from a previously backed up directory
+
+SYNOPSIS:
+    sprinkle.py [options] restore {remote dir} {local dir}
+
+DESCRIPTION:
+    Restores the remote directories from the rclone drives to the local directory specified.
+
+ARGUMENTS:
+    remote dir
+        the remote directory to restore
+
+    local dir
+        the local directory to use
+
+EXAMPLES:
+    sprinkle.py restore /backup c:/backup
+    """
+    print(usage_restore.__doc__)
+    print(usage_options.__doc__)
+    print(copyrights.__doc__)
+    print(credits.__doc__)
 
 
 def usage_help():
-    print_heading()
-    version()
-    print('')
-    print("usage: sprinkle.py [options] help {command}")
-    print("    command = the command to display help for")
+    """
+NAME:
+    sprinkle help - display help for specific commands
+
+SYNOPSIS:
+    sprinkle.py [options] help {command}
+
+DESCRIPTION:
+    displays the general help about sprinkle
+
+ARGUMENTS:
+    command
+        the command to display help for
+
+EXAMPLES:
+    sprinkle.py help
+    """
+    print(usage_help.__doc__)
+    print(copyrights.__doc__)
+    print(credits.__doc__)
+    print(warranty.__doc__)
 
 
 def usage_stats():
-    print_heading()
-    version()
-    print('')
-    print("usage: sprinkle.py [options] stats")
-    usage_options()
-    copyrights()
+    """
+NAME:
+    sprinkle stats - display volume statistics
+
+SYNOPSIS:
+    sprinkle.py [options] stats
+
+DESCRIPTION:
+    display the statistics about all the remote volumes. The output should look like:
+
+    REMOTE                          SIZE                 FREE      %FREE
+    =============== ==================== ==================== ==========
+    volume1:                         15G                   0G          1
+    volume2:                         15G                   1G          7
+    volume3:                         15G                   0G          3
+    --------------- -------------------- -------------------- ----------
+    total:                           45G                   1G          3
+
+EXAMPLES:
+    sprinkle.py stats
+    sprinkle.py --display-unit=K stats
+    """
+    print(usage_stats.__doc__)
+    print(usage_options.__doc__)
+    print(copyrights.__doc__)
+    print(credits.__doc__)
 
 
 def usage_removedups():
-    print_heading()
-    version()
-    print('')
-    print("usage: sprinkle.py [options] removedups [path]")
-    print("      path = the path to calculate duplicates")
-    usage_options()
-    copyrights()
+    """
+NAME:
+    sprinkle removedups - remove duplicate files from remote volumes
+
+SYNOPSIS:
+    sprinkle.py [options] removedups {path}
+
+DESCRIPTION:
+    Removes duplicate files from remote volumes. Remote file can accumulate over time due to a variety of
+    conditions. Run this utility often to minimize chances of having corrupt data.
+
+ARGUMENTS:
+    path
+        the remote path to list files
+
+EXAMPLES:
+    sprinkle.py removedups /backup
+    """
+    print(usage_removedups.__doc__)
+    print(usage_options.__doc__)
+    print(copyrights.__doc__)
+    print(credits.__doc__)
 
 
 def version():
-    print("version: " + __version__ + '.' + __revision__ +
+    print("VERSION:\n    " + __version__ + '.' + __revision__ +
           ", module version: " + clsync.__version__ + '.' + clsync.__revision__ +
           ", rclone module version: " + rclone.__version__ + '.' + rclone.__revision__)
 
@@ -633,16 +828,18 @@ def main(argv):
         else:
             if __args[1] == 'ls':
                 usage_ls()
-            if __args[1] == 'lsmd5':
+            elif __args[1] == 'lsmd5':
                 usage_lsmd5()
-            if __args[1] == 'backup':
+            elif __args[1] == 'backup':
                 usage_backup()
-            if __args[1] == 'restore':
+            elif __args[1] == 'restore':
                 usage_restore()
-            if __args[1] == 'stats':
+            elif __args[1] == 'stats':
                 usage_stats()
-            if __args[1] == 'removedups':
+            elif __args[1] == 'removedups':
                 usage_removedups()
+            elif __args[1] == 'config':
+                usage_config()
             else:
                 print('')
                 print('invalid command. Use help [command]')
