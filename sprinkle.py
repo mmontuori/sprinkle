@@ -20,7 +20,11 @@ import getopt
 import sys
 import traceback
 import os
-from filelock import Timeout, FileLock
+try:
+    from filelock import Timeout, FileLock
+except:
+    print('FileLock library not found. run: "pip3 install filelock"')
+    quit()
 
 
 lock = FileLock("sprinkle.lock", timeout=1)
@@ -83,6 +87,7 @@ OPTIONS:
     --exclude-regex {regex}      regular expression to match for file backup exclusion
     --log-file {file}            logs output to the specified file
     --single-instance            make sure only 1 concurrent instance of sprinkle is running (default:False)
+    --check-prereq               chech prerequisites
     """
     return
 
@@ -378,6 +383,7 @@ def read_args(argv):
     global __exclude_regex
     global __log_file
     global __single_instance
+    global __check_prereq
 
     __configfile = None
     __cmd_debug = None
@@ -404,6 +410,7 @@ def read_args(argv):
     __exclude_regex = None
     __log_file = None
     __single_instance = None
+    __check_prereq = None
 
     try:
         opts, args = getopt.getopt(argv, "dvhc:s:",
@@ -433,7 +440,8 @@ def read_args(argv):
                                     "exclude-file=",
                                     "exclude-regex=",
                                     "log-file=",
-                                    "single-instance"
+                                    "single-instance",
+                                    "check-prereq"
                                     ])
     except getopt.GetoptError:
         usage()
@@ -496,8 +504,10 @@ def read_args(argv):
             __log_file = arg
         elif opt in ("--single-instance"):
             __single_instance = True
+        elif opt in ("--check-prereq"):
+            __check_prereq = True
 
-    if len(args) < 1:
+    if len(args) < 1 and __check_prereq is None:
         usage()
         sys.exit()
 
@@ -520,7 +530,8 @@ def configure(config_file):
         "display_unit": "G",
         "rclone_retries": '1',
         "log_file": None,
-        "single_instance": False
+        "single_instance": False,
+        "check_prereq": False
     }
 
     if config_file is not None:
@@ -600,6 +611,9 @@ def configure(config_file):
 
     if __single_instance is not None:
         __config['single_instance'] = __single_instance
+
+    if __check_prereq is not None:
+        __config['check_prereq'] = __check_prereq
 
 
 def verify_configuration():
@@ -825,10 +839,27 @@ def check_single_instance():
             sys.exit(-1)
 
 
+def check_prerequisites():
+    logging.info('checking prerequisites, examine the error messages below...')
+    check_reault = True
+    try:
+        __cl_sync = clsync.ClSync(__config)
+        __cl_sync.get_remotes()
+    except:
+        check_reault = False
+    if check_reault is True:
+        logging.info('**** PASSED! ****')
+    else:
+        logging.info('**** FAILED! *****')
+
+
 def main(argv):
     read_args(argv)
     configure(__configfile)
     verify_configuration()
+    if __check_prereq is not None and __check_prereq is True:
+        check_prerequisites()
+        sys.exit(0)
     check_single_instance()
     logging.debug('config: ' + str(__config))
 

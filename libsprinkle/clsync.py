@@ -15,7 +15,11 @@ from libsprinkle import common
 from libsprinkle import clfile
 from libsprinkle import exceptions
 from libsprinkle import operation
-from progress.bar import Bar
+try:
+    from progress.bar import Bar
+except:
+    print("Progress library not found. run command 'pip3 install progress'")
+    quit()
 import json
 import os
 import re
