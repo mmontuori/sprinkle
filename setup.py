@@ -26,9 +26,9 @@ def read(name):
 setup(
     name='sprinkle-py',
     version=sprinkle.__version__+'.'+sprinkle.__revision__,
-    packages=find_packages(exclude=['contrib', 'docs', 'tests']),
-    #packages=['sprinkle'],
-    #install_requires=read('requirements.txt'),
+    #packages=find_packages(exclude=['contrib', 'docs', 'tests']),
+    packages=['libsprinkle'],
+    install_requires=read('requirements.txt'),
     url='https://gitlab.com/mmontuori/sprinkle',
     license='GPLv3',
     include_package_data=True,
