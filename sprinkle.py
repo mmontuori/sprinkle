@@ -15,6 +15,7 @@ from libsprinkle import rclone
 from libsprinkle import config
 from libsprinkle import common
 from libsprinkle import smtp_email
+from libsprinkle import sprinkle_daemon
 import logging
 import getopt
 import sys
@@ -88,6 +89,7 @@ OPTIONS:
     --log-file {file}            logs output to the specified file
     --single-instance            make sure only 1 concurrent instance of sprinkle is running (default:False)
     --check-prereq               chech prerequisites
+    --daemon                     start sprinkle in daemon mode
     """
     return
 
@@ -384,6 +386,8 @@ def read_args(argv):
     global __log_file
     global __single_instance
     global __check_prereq
+    global __daemon_mode
+    global __daemon_interval
 
     __configfile = None
     __cmd_debug = None
@@ -411,6 +415,8 @@ def read_args(argv):
     __log_file = None
     __single_instance = None
     __check_prereq = None
+    __daemon_mode = None
+    __daemon_interval = None
 
     try:
         opts, args = getopt.getopt(argv, "dvhc:s:",
@@ -441,7 +447,9 @@ def read_args(argv):
                                     "exclude-regex=",
                                     "log-file=",
                                     "single-instance",
-                                    "check-prereq"
+                                    "check-prereq",
+                                    "daemon",
+                                    "daemon_interval"
                                     ])
     except getopt.GetoptError:
         usage()
@@ -506,6 +514,10 @@ def read_args(argv):
             __single_instance = True
         elif opt in ("--check-prereq"):
             __check_prereq = True
+        elif opt in ("--daemon"):
+            __daemon_mode = True
+        elif opt in ("--daemon-interval"):
+            __daemon_interval = int(arg)
 
     if len(args) < 1 and __check_prereq is None:
         usage()
@@ -531,7 +543,9 @@ def configure(config_file):
         "rclone_retries": '1',
         "log_file": None,
         "single_instance": False,
-        "check_prereq": False
+        "check_prereq": False,
+        "daemon": False,
+        "daemon_interval": 3600
     }
 
     if config_file is not None:
@@ -614,6 +628,12 @@ def configure(config_file):
 
     if __check_prereq is not None:
         __config['check_prereq'] = __check_prereq
+
+    if __daemon_mode is not None:
+        __config['daemon'] = __daemon_mode
+
+    if __daemon_interval is not None:
+        __config['daemon_interval'] = __daemon_interval
 
 
 def verify_configuration():
@@ -871,25 +891,33 @@ def main(argv):
         elif __args[0] == 'lsmd5':
             lsmd5()
         elif __args[0] == 'backup':
-            try:
-                backup()
-            except Exception as e:
-                if __config['smtp_enable'] is True:
-                    logging.info('sending email')
-                    email = smtp_email.EMail()
-                    email.set_from(__config['smtp_from'])
-                    email.set_to(__config['smtp_to'])
-                    email.set_smtp_server(__config['smtp_server'])
-                    email.set_smtp_port(__config['smtp_port'])
-                    if 'smtp_user' in __config:
-                        email.set_smtp_user(__config['smtp_user'])
-                    if 'smtp_password' in __config:
-                        email.set_smtp_password(__config['smtp_password'])
-                    email.set_subject('Sprinkle Failure Notification')
-                    email.set_message('Sprinkle has experienced the following error:\n\n' + str(e) +
-                                      '\n\nExamine logs for additional information')
-                    email.send()
-                raise e
+            if __daemon_mode is not None:
+                try:
+                    sd = sprinkle_daemon.SprinkleDaemon(__config, __args[1])
+                    sd.start()
+                except Exception as e:
+                    logging.error('error starting daemon')
+                    logging.error('error message: ' + str(e))
+            else:
+                try:
+                    backup()
+                except Exception as e:
+                    if __config['smtp_enable'] is True:
+                        logging.info('sending email')
+                        email = smtp_email.EMail()
+                        email.set_from(__config['smtp_from'])
+                        email.set_to(__config['smtp_to'])
+                        email.set_smtp_server(__config['smtp_server'])
+                        email.set_smtp_port(__config['smtp_port'])
+                        if 'smtp_user' in __config:
+                            email.set_smtp_user(__config['smtp_user'])
+                        if 'smtp_password' in __config:
+                            email.set_smtp_password(__config['smtp_password'])
+                        email.set_subject('Sprinkle Failure Notification')
+                        email.set_message('Sprinkle has experienced the following error:\n\n' + str(e) +
+                                          '\n\nExamine logs for additional information')
+                        email.send()
+                    raise e
         elif __args[0] == 'restore':
             restore()
         elif __args[0] == 'stats':
