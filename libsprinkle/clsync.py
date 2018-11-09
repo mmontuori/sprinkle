@@ -73,7 +73,7 @@ class ClSync:
 
         self._cache = None
         self._cache_counter = 0
-        self._cache_invalication_max = 86400 / config['daemon_interval']
+        self._cache_invalication_max = 86400 / (config['daemon_interval'] * 2)
 
         if 'rclone_exe' not in self._config:
             self._rclone = rclone.RClone(rclone_config)
