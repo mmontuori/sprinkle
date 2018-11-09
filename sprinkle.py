@@ -565,9 +565,9 @@ def configure(config_file):
             __config[field] = _default_values[field]
 
     if __cmd_debug is True:
-        init_logging(True)
+        init_logging(True, __config['daemon'])
     elif 'debug' in __config:
-        init_logging(__config['debug'])
+        init_logging(__config['debug'], __config['daemon'])
 
     if __dist_type is not None:
         __config['distribution_type'] = __dist_type
@@ -675,7 +675,7 @@ def load_exclusion_file(exclude_file):
     return lines
 
 
-def init_logging(debug):
+def init_logging(debug, daemon_mode=False):
     if debug is True:
         logging.basicConfig(format='%(asctime)s %(message)s',
                             datefmt='%m/%d/%Y %I:%M:%S %p',
@@ -683,9 +683,16 @@ def init_logging(debug):
                             filename=__log_file)
         logging.getLogger('sprinkle').setLevel(logging.DEBUG)
     else:
-        logging.basicConfig(format='%(message)s',
-                            level=logging.INFO,
-                            filename=__log_file)
+        if daemon_mode is False:
+            logging.basicConfig(format='%(message)s',
+                                level=logging.INFO,
+                                filename=__log_file)
+        else:
+            print("ELSE " + str(daemon_mode))
+            logging.basicConfig(format='%(asctime)s %(message)s',
+                                datefmt='%m/%d/%Y %I:%M:%S %p',
+                                level=logging.INFO,
+                                filename=__log_file)
         logging.getLogger('sprinkle').setLevel(logging.INFO)
 
 

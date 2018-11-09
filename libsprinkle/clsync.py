@@ -72,6 +72,7 @@ class ClSync:
             self.__exclude_regex = None
 
         self._cache = None
+        self._cache_counter = 0
 
         if 'rclone_exe' not in self._config:
             self._rclone = rclone.RClone(rclone_config)
@@ -96,7 +97,11 @@ class ClSync:
         logging.debug('lsjson of file: ' + file)
         if self._config['no_cache'] is False and self._cache is not None:
             logging.debug('serving cached version of file list...')
-            return self._cache
+            self._cache_counter += 1
+            if self._cache_counter <= 24:
+                return self._cache
+            else:
+                self._cache_counter = 0
         if not file.startswith('/'):
             file = '/' + file
         files = {}
