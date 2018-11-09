@@ -451,8 +451,8 @@ def read_args(argv):
                                     "single-instance",
                                     "check-prereq",
                                     "daemon",
-                                    "daemon_interval=",
-                                    "daemon_pidfile="
+                                    "daemon-interval=",
+                                    "daemon-pidfile="
                                     ])
     except getopt.GetoptError:
         usage()
