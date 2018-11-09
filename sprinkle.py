@@ -388,6 +388,7 @@ def read_args(argv):
     global __check_prereq
     global __daemon_mode
     global __daemon_interval
+    global __daemon_pidfile
 
     __configfile = None
     __cmd_debug = None
@@ -417,6 +418,7 @@ def read_args(argv):
     __check_prereq = None
     __daemon_mode = None
     __daemon_interval = None
+    __daemon_pidfile = None
 
     try:
         opts, args = getopt.getopt(argv, "dvhc:s:",
@@ -449,7 +451,8 @@ def read_args(argv):
                                     "single-instance",
                                     "check-prereq",
                                     "daemon",
-                                    "daemon_interval"
+                                    "daemon_interval=",
+                                    "daemon_pidfile="
                                     ])
     except getopt.GetoptError:
         usage()
@@ -518,6 +521,8 @@ def read_args(argv):
             __daemon_mode = True
         elif opt in ("--daemon-interval"):
             __daemon_interval = int(arg)
+        elif opt in ("--daemon-pidfile"):
+            __daemon_pidfile = arg
 
     if len(args) < 1 and __check_prereq is None:
         usage()
@@ -545,7 +550,8 @@ def configure(config_file):
         "single_instance": False,
         "check_prereq": False,
         "daemon": False,
-        "daemon_interval": 3600
+        "daemon_interval": 3600,
+        "daemon_pidfile": '/var/run/sprinkle.pid'
     }
 
     if config_file is not None:
@@ -898,6 +904,8 @@ def main(argv):
                 except Exception as e:
                     logging.error('error starting daemon')
                     logging.error('error message: ' + str(e))
+                    if __cmd_debug is True:
+                        traceback.print_exc(file=sys.stderr)
             else:
                 try:
                     backup()

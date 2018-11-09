@@ -31,15 +31,16 @@ class SprinkleDaemon(run.RunDaemon):
             raise Exception('invalid parameters passed to daemon')
         self.__config = config
         self.__local_dir = local_dir
+        self.__cl_sync = None
+        super(run.RunDaemon, self).__init__(pidfile=config['daemon_pidfile'])
 
     def run(self):
         logging.info('starting daemom to backup path: ' + self.__local_dir)
         while True:
-            global __cl_sync
-            if __cl_sync is None:
-                __cl_sync = clsync.ClSync(self.__config)
+            if self.__cl_sync is None:
+                self.__cl_sync = clsync.ClSync(self.__config)
             local_dir = common.remove_ending_slash(self.__local_dir)
             common.print_line('backing up ' + local_dir + '...')
-            __cl_sync.backup(local_dir, self.__config['delete_files'], self.__config['dry_run'])
-            logging.debug('sleeping for ' + str(self.__config['daemon_interval']))
+            self.__cl_sync.backup(local_dir, self.__config['delete_files'], self.__config['dry_run'])
+            logging.info('sleeping for ' + str(self.__config['daemon_interval']) + ' seconds...')
             time.sleep(self.__config['daemon_interval'])
