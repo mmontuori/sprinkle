@@ -73,6 +73,7 @@ class ClSync:
 
         self._cache = None
         self._cache_counter = 0
+        self._cache_invalication_max = 86400 / config['daemon_interval']
 
         if 'rclone_exe' not in self._config:
             self._rclone = rclone.RClone(rclone_config)
@@ -96,9 +97,9 @@ class ClSync:
     def ls(self, file, with_dups=False):
         logging.debug('lsjson of file: ' + file)
         if self._config['no_cache'] is False and self._cache is not None:
-            logging.debug('serving cached version of file list...')
+            logging.info('serving cached version of file list...' + str(self._cache_invalication_max))
             self._cache_counter += 1
-            if self._cache_counter <= 24:
+            if self._cache_counter <= self._cache_invalication_max:
                 return self._cache
             else:
                 self._cache_counter = 0
