@@ -97,7 +97,7 @@ class ClSync:
     def ls(self, file, with_dups=False):
         logging.debug('lsjson of file: ' + file)
         if self._config['no_cache'] is False and self._cache is not None:
-            logging.info('serving cached version of file list...' + str(self._cache_invalication_max))
+            logging.debug('serving cached version of file list...')
             self._cache_counter += 1
             if self._cache_counter <= self._cache_invalication_max:
                 return self._cache
