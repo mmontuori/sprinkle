@@ -416,7 +416,7 @@ def read_args(argv):
     __log_file = None
     __single_instance = None
     __check_prereq = None
-    __daemon_mode = None
+    __daemon_mode = False
     __daemon_interval = None
     __daemon_pidfile = None
 
@@ -565,9 +565,9 @@ def configure(config_file):
             __config[field] = _default_values[field]
 
     if __cmd_debug is True:
-        init_logging(True, __config['daemon'])
+        init_logging(True, __daemon_mode)
     elif 'debug' in __config:
-        init_logging(__config['debug'], __config['daemon'])
+        init_logging(__config['debug'], __daemon_mode)
 
     if __dist_type is not None:
         __config['distribution_type'] = __dist_type
@@ -688,7 +688,6 @@ def init_logging(debug, daemon_mode=False):
                                 level=logging.INFO,
                                 filename=__log_file)
         else:
-            print("ELSE " + str(daemon_mode))
             logging.basicConfig(format='%(asctime)s %(message)s',
                                 datefmt='%m/%d/%Y %I:%M:%S %p',
                                 level=logging.INFO,
