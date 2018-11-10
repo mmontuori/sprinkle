@@ -89,7 +89,9 @@ OPTIONS:
     --log-file {file}            logs output to the specified file
     --single-instance            make sure only 1 concurrent instance of sprinkle is running (default:False)
     --check-prereq               chech prerequisites
-    --daemon                     start sprinkle in daemon mode
+    --daemon-type                type of daemon [interval|ondemand] (default:interval)
+    --daemon-mode                start sprinkle in daemon mode
+    --daemon-interval            interval for the daemon to execute in minutes (default:60)
     """
     return
 
@@ -386,6 +388,7 @@ def read_args(argv):
     global __log_file
     global __single_instance
     global __check_prereq
+    global __daemon_type
     global __daemon_mode
     global __daemon_interval
     global __daemon_pidfile
@@ -416,6 +419,7 @@ def read_args(argv):
     __log_file = None
     __single_instance = None
     __check_prereq = None
+    __daemon_type = None
     __daemon_mode = False
     __daemon_interval = None
     __daemon_pidfile = None
@@ -450,7 +454,8 @@ def read_args(argv):
                                     "log-file=",
                                     "single-instance",
                                     "check-prereq",
-                                    "daemon",
+                                    "daemon-type=",
+                                    "daemon-mode",
                                     "daemon-interval=",
                                     "daemon-pidfile="
                                     ])
@@ -517,7 +522,10 @@ def read_args(argv):
             __single_instance = True
         elif opt in ("--check-prereq"):
             __check_prereq = True
-        elif opt in ("--daemon"):
+        elif opt in ("--daemon-type"):
+            print("here1")
+            __daemon_type = arg
+        elif opt in ("--daemon-mode"):
             __daemon_mode = True
         elif opt in ("--daemon-interval"):
             __daemon_interval = int(arg)
@@ -549,8 +557,9 @@ def configure(config_file):
         "log_file": None,
         "single_instance": False,
         "check_prereq": False,
-        "daemon": False,
-        "daemon_interval": 3600,
+        "daemon_type": 'interval',
+        "daemon_mode": False,
+        "daemon_interval": 60,
         "daemon_pidfile": '/var/run/sprinkle.pid'
     }
 
@@ -562,6 +571,7 @@ def configure(config_file):
 
     for field in _default_values:
         if field not in __config:
+            print('assigning default ' + field + ' of ' + str(_default_values[field]))
             __config[field] = _default_values[field]
 
     if __cmd_debug is True:
@@ -635,8 +645,12 @@ def configure(config_file):
     if __check_prereq is not None:
         __config['check_prereq'] = __check_prereq
 
+    if __daemon_type is not None:
+        print("here " + __daemon_type)
+        __config['daemon_type'] = __daemon_type
+
     if __daemon_mode is not None:
-        __config['daemon'] = __daemon_mode
+        __config['daemon_mode'] = __daemon_mode
 
     if __daemon_interval is not None:
         __config['daemon_interval'] = __daemon_interval

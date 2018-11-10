@@ -25,6 +25,8 @@ class SprinkleDaemon(run.RunDaemon):
 
     def __init__(self, config, local_dir):
         logging.info('initializing daemon mode on ' + os.name + '...')
+        if config['daemon_type'] != 'interval':
+            raise Exception('daemon type "' + config['daemon_type'] + '" is not supported')
         if os.name == 'nt':
             raise Exception('daemon cannot run on Windows')
         if config is None or local_dir is None:
@@ -36,11 +38,12 @@ class SprinkleDaemon(run.RunDaemon):
 
     def run(self):
         logging.info('starting daemom to backup path: ' + self.__local_dir)
+        sleep_interval = self.__config['daemon_interval'] * 60
         while True:
             if self.__cl_sync is None:
                 self.__cl_sync = clsync.ClSync(self.__config)
             local_dir = common.remove_ending_slash(self.__local_dir)
             common.print_line('backing up ' + local_dir + '...')
             self.__cl_sync.backup(local_dir, self.__config['delete_files'], self.__config['dry_run'])
-            logging.info('sleeping for ' + str(self.__config['daemon_interval']) + ' seconds...')
-            time.sleep(self.__config['daemon_interval'])
+            logging.info('sleeping for ' + str(sleep_interval) + ' seconds...')
+            time.sleep(sleep_interval)
