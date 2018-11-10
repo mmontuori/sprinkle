@@ -92,6 +92,7 @@ OPTIONS:
     --daemon-type                type of daemon [interval|ondemand] (default:interval)
     --daemon-mode                start sprinkle in daemon mode
     --daemon-interval            interval for the daemon to execute in minutes (default:60)
+    --daemon-pidfile             daemon pidfile (default:/var/run/sprinkle.pid or /tmp/sprinkle.pid)
     """
     return
 
@@ -645,14 +646,17 @@ def configure(config_file):
         __config['check_prereq'] = __check_prereq
 
     if __daemon_type is not None:
-        print("here " + __daemon_type)
         __config['daemon_type'] = __daemon_type
 
     if __daemon_mode is not None:
         __config['daemon_mode'] = __daemon_mode
+        __config['no_cache'] = True
 
     if __daemon_interval is not None:
         __config['daemon_interval'] = __daemon_interval
+
+    if __daemon_pidfile is not None:
+        __config['daemon_pidfile'] = __daemon_pidfile
 
 
 def verify_configuration():
@@ -674,6 +678,10 @@ def verify_configuration():
         __exclusion_list = load_exclusion_file(__config['exclude_file'])
         logging.debug('exclusion list: ' + str(__exclusion_list))
         __config['__exclusion_list'] = __exclusion_list
+
+    if os.access(__config['daemon_pidfile'], os.W_OK) is not True:
+        logging.warning('cannot write to pidfile "' + __config['daemon_pidfile'] + '" switching to /tmp/sprinkle.pid')
+        __config['daemon_pidfile'] = '/tmp/sprinkle.pid'
 
 
 def load_exclusion_file(exclude_file):
