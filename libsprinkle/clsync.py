@@ -375,10 +375,8 @@ class ClSync:
         local_clfiles = self.index_local_dir(local_dir, self.__exclusion_list)
         remote_clfiles = self.ls(os.path.basename(local_dir))
         ops = self.compare_clfiles(local_dir, local_clfiles, remote_clfiles, delete_files)
-        if len(ops) > 0 and self._show_progress:
+        if self._show_progress:
             bar = Bar('Progress', max=len(ops), suffix='%(index)d/%(max)d %(percent)d%% [%(elapsed_td)s/%(eta_td)s]')
-        else:
-            common.print_line('no action necessary')
         if dry_run is True:
             common.print_line('performing a dry run. no changes are committed')
         for op in ops:
@@ -421,7 +419,7 @@ class ClSync:
                         self.delete_file(op.src.path, op.src.remote)
             if self._show_progress:
                 bar.next()
-        if  len(ops) > 0 and self._show_progress:
+        if self._show_progress:
             bar.finish()
 
     def restore_old(self, remote_path, local_dir):
