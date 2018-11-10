@@ -571,7 +571,6 @@ def configure(config_file):
 
     for field in _default_values:
         if field not in __config:
-            print('assigning default ' + field + ' of ' + str(_default_values[field]))
             __config[field] = _default_values[field]
 
     if __cmd_debug is True:
