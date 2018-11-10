@@ -679,7 +679,7 @@ def verify_configuration():
         logging.debug('exclusion list: ' + str(__exclusion_list))
         __config['__exclusion_list'] = __exclusion_list
 
-    if os.access(__config['daemon_pidfile'], os.W_OK) is not True:
+    if os.access(os.path.dirname(__config['daemon_pidfile']), os.W_OK) is not True:
         logging.warning('cannot write to pidfile "' + __config['daemon_pidfile'] + '" switching to /tmp/sprinkle.pid')
         __config['daemon_pidfile'] = '/tmp/sprinkle.pid'
 
