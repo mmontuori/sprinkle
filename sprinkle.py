@@ -354,6 +354,30 @@ EXAMPLES:
     print(credits.__doc__)
 
 
+def usage_find():
+    """
+    NAME:
+        sprinkle find - search for files on the remote volumes
+
+    SYNOPSIS:
+        sprinkle.py [options] find {regexp}
+
+    DESCRIPTION:
+        Finds files on all configured remote volumes specified with the regular expression.
+
+    ARGUMENTS:
+        regexp
+            the regular expression used to filter files
+
+    EXAMPLES:
+        sprinkle.py find "/backup/....sh"
+        """
+    print(usage_find.__doc__)
+    print(usage_options.__doc__)
+    print(copyrights.__doc__)
+    print(credits.__doc__)
+
+
 def version():
     print("VERSION:\n    " + __version__ + '.' + __revision__ +
           ", module version: " + clsync.__version__ + '.' + clsync.__revision__ +
@@ -679,7 +703,7 @@ def verify_configuration():
         logging.debug('exclusion list: ' + str(__exclusion_list))
         __config['__exclusion_list'] = __exclusion_list
 
-    if os.access(os.path.dirname(__config['daemon_pidfile']), os.W_OK) is not True:
+    if __daemon_mode is True and os.access(os.path.dirname(__config['daemon_pidfile']), os.W_OK) is not True:
         logging.warning('cannot write to pidfile "' + __config['daemon_pidfile'] + '" switching to /tmp/sprinkle.pid')
         __config['daemon_pidfile'] = '/tmp/sprinkle.pid'
 
@@ -743,7 +767,6 @@ def ls():
                       ''.join('-' for i in range(19)) + " " +
                       ''.join('-' for i in range(15))
                       )
-
     for tmp_file in keys:
         if files[tmp_file].is_dir is True:
             first_chars = '-d-'
@@ -883,6 +906,38 @@ def remove_duplicates():
     __cl_sync.remove_duplicates(common.remove_ending_slash(__args[1]))
 
 
+def find():
+    global __cl_sync
+    if __cl_sync is None:
+        __cl_sync = clsync.ClSync(__config)
+    if len(__args) == 1:
+        logging.error('invalid find command')
+        usage_find()
+        sys.exit(-1)
+    files = __cl_sync.find(common.remove_ending_slash(__args[1]))
+    largest_length = 25
+    keys = common.sort_dict_keys(files)
+    for tmp_file in keys:
+        filename_length = len(files[tmp_file].path)
+        if not files[tmp_file].is_dir and filename_length > largest_length:
+            largest_length = filename_length
+    print_ls_header(largest_length)
+    for tmp_file in keys:
+        if files[tmp_file].is_dir is True:
+            first_chars = '-d-'
+        else:
+            first_chars = '---'
+        file_name = files[tmp_file].path
+        if file_name.startswith('//'):
+            file_name = file_name[1:len(file_name)]
+        common.print_line(first_chars + " " +
+                          file_name.ljust(largest_length) + " " +
+                          str(files[tmp_file].size).rjust(9) + " " +
+                          common.get_printable_datetime(files[tmp_file].mod_time).ljust(19) + " " +
+                          files[tmp_file].remote
+                          )
+
+
 def check_single_instance():
     if __single_instance is not None and __single_instance is True:
         try:
@@ -959,6 +1014,8 @@ def main(argv):
             stats()
         elif __args[0] == 'removedups':
             remove_duplicates()
+        elif __args[0] == 'find':
+            find()
         elif __args[0] == 'help':
             if len(__args) < 2:
                 usage_help()
@@ -977,6 +1034,8 @@ def main(argv):
                     usage_removedups()
                 elif __args[1] == 'config':
                     usage_config()
+                elif __args[1] == 'find':
+                    usage_find()
                 else:
                     print('')
                     print('invalid command. Use help [command]')

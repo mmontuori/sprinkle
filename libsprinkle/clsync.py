@@ -96,7 +96,7 @@ class ClSync:
             logging.debug('creating directory ' + remote + directory)
             self._rclone.mkdir(remote, directory)
 
-    def ls(self, file, with_dups=False):
+    def ls(self, file, with_dups=False, regex=None):
         logging.debug('lsjson of file: ' + file)
         if self._config['no_cache'] is False and self._cache is not None:
             logging.debug('serving cached version of file list...')
@@ -107,6 +107,8 @@ class ClSync:
                 self._cache_counter = 0
         if not file.startswith('/'):
             file = '/' + file
+        if regex is not None:
+            regexp = re.compile(regex)
         files = {}
         md5s = None
         if self._compare_method == 'md5':
@@ -133,6 +135,8 @@ class ClSync:
                 tmp_file.is_dir = tmp_json_file['IsDir']
                 tmp_file.id = tmp_json_file['ID']
                 key = file + '/' + tmp_json_file['Path']
+                if regexp.match(key) is None:
+                    continue
                 if self._compare_method == 'md5' and not tmp_file.is_dir:
                     tmp_file.md5 = md5s[key]
                 if with_dups and tmp_file.is_dir is False and key in files:
@@ -521,3 +525,7 @@ class ClSync:
                         self.delete_file(key, files[key].remote)
                 logging.debug('file to remove: ' + file_to_remove)
         return duplicates
+
+    def find(self, regex):
+        logging.debug('finding files with regular expression ' + regex)
+        return self.ls('/', with_dups=False, regex=regex)
