@@ -69,30 +69,30 @@ CREDITS:
 def usage_options():
     """
 OPTIONS:
-    -h, --help                   help
     -c, --conf {config file}     configuration file
-    -v, --version                print version
     -d, --debug                  debug output
-    --dist-type {mas}            distribution type (default:mas)
+    -h, --help                   help
+    -v, --version                print version
+    --check-prereq               chech prerequisites
     --comp-method {size|md5}     compare method [size|md5] (default:size)
-    --rclone-exe {rclone_exe}    rclone executable (default:rclone)
-    --rclone-conf {config file}  rclone configuration (default:None)
-    --display-unit {G|M|K|B}     display unit (G)igabytes, (M)egabytes, (K)ilobytes, or (B)ites
-    --retries {num_retries}      number of retries (default:1)
-    --show-progress              show progress
+    --daemon-interval            interval for the daemon to execute in minutes (default:60)
+    --daemon-mode                start sprinkle in daemon mode
+    --daemon-pidfile             daemon pidfile (default:/var/run/sprinkle.pid or /tmp/sprinkle.pid)
+    --daemon-type                type of daemon [interval|ondemand] (default:interval)
     --delete-files               do not delete files on remote end (default:false)
-    --restore-duplicates         restore files if duplicates are found (default:false)
+    --display-unit {G|M|K|B}     display unit (G)igabytes, (M)egabytes, (K)ilobytes, or (B)ites
+    --dist-type {mas}            distribution type (default:mas)
     --dry-run                    perform a dry run without actually backing up
-    --no-cache                   turn off caching
     --exclude-file {file}        file containing the backup exclude paths
     --exclude-regex {regex}      regular expression to match for file backup exclusion
     --log-file {file}            logs output to the specified file
+    --no-cache                   turn off caching
+    --rclone-conf {config file}  rclone configuration (default:None)
+    --rclone-exe {rclone_exe}    rclone executable (default:rclone)
+    --restore-duplicates         restore files if duplicates are found (default:false)
+    --retries {num_retries}      number of retries (default:1)
+    --show-progress              show progress
     --single-instance            make sure only 1 concurrent instance of sprinkle is running (default:False)
-    --check-prereq               chech prerequisites
-    --daemon-type                type of daemon [interval|ondemand] (default:interval)
-    --daemon-mode                start sprinkle in daemon mode
-    --daemon-interval            interval for the daemon to execute in minutes (default:60)
-    --daemon-pidfile             daemon pidfile (default:/var/run/sprinkle.pid or /tmp/sprinkle.pid)
     """
     return
 
@@ -100,14 +100,14 @@ OPTIONS:
 def usage_commands():
     """
 COMMANDS:
+    backup                       backup files to clustered drives
     config                       configure rclone to access volumes
+    help                         displays the help fot the specific command
     ls                           list files
     lsmd5                        list md5 of files
-    backup                       backup files to clustered drives
-    restore                      restore files from clustered drives
     stats                        display volume statistics
+    restore                      restore files from clustered drives
     removedups                   removes duplicate files
-    help                         displays the help fot the specific command
     """
     return
 
@@ -921,7 +921,18 @@ def find():
         filename_length = len(files[tmp_file].path)
         if not files[tmp_file].is_dir and filename_length > largest_length:
             largest_length = filename_length
-    print_ls_header(largest_length)
+    common.print_line('---' + " " +
+                      'NAME'.ljust(largest_length) + " " +
+                      'SIZE'.rjust(9) + " " +
+                      'MOD TIME'.ljust(19) + " " +
+                      'REMOTE'
+                      )
+    common.print_line('---' + " " +
+                      ''.join('-' for i in range(largest_length)) + " " +
+                      ''.join('-' for i in range(9)) + " " +
+                      ''.join('-' for i in range(19)) + " " +
+                      ''.join('-' for i in range(15))
+                      )
     for tmp_file in keys:
         if files[tmp_file].is_dir is True:
             first_chars = '-d-'
