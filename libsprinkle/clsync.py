@@ -106,6 +106,7 @@ class ClSync:
             else:
                 self._cache_counter = 0
         if not file.startswith('/'):
+            logging.debug('adding / ' + file)
             file = '/' + file
         if regex is not None:
             regexp = re.compile(regex)
@@ -137,7 +138,8 @@ class ClSync:
                 tmp_file.is_dir = tmp_json_file['IsDir']
                 tmp_file.id = tmp_json_file['ID']
                 key = file + '/' + tmp_json_file['Path']
-                if regexp is not None and regexp.match(key) is None:
+                if regexp is not None and regexp.search(key) is None:
+                    logging.debug('skipping ' + key + '...')
                     continue
                 if self._compare_method == 'md5' and not tmp_file.is_dir:
                     tmp_file.md5 = md5s[key]
@@ -530,4 +532,4 @@ class ClSync:
 
     def find(self, regex):
         logging.debug('finding files with regular expression ' + regex)
-        return self.ls('/backup', with_dups=False, regex=regex)
+        return self.ls('/', with_dups=False, regex=regex)

@@ -67,7 +67,7 @@ class RClone:
         command_with_args.append(self._rclone_retries)
         command_with_args.append(remote + directory)
         result = common.execute(command_with_args, no_error)
-        logging.debug('result: ' + str(result))
+        logging.debug('result: ' + str(result)[0:128])
         if result['error'] is not '':
             if no_error is False:
                 # logging.error('error getting remotes objects')
@@ -79,7 +79,7 @@ class RClone:
             lsjson = '[]'
         else:
             lsjson = result['out']
-        logging.debug('returning ' + str(lsjson))
+        logging.debug('returning ' + str(lsjson)[0:128])
         return lsjson
 
     def md5sum(self, remote, directory, extra_args=[], no_error=False):
@@ -97,7 +97,7 @@ class RClone:
         command_with_args.append(self._rclone_retries)
         command_with_args.append(remote+directory)
         result = common.execute(command_with_args, no_error)
-        logging.debug('result: ' + str(result))
+        logging.debug('result: ' + str(result)[0:128])
         if result['error'] is not '':
             if no_error is False:
                 #logging.error('error getting remotes objects')
@@ -109,7 +109,7 @@ class RClone:
             lsjson = '[]'
         else:
             lsjson = result['out']
-        logging.debug('returning ' + str(lsjson))
+        logging.debug('returning ' + str(lsjson)[0:128])
         return lsjson
 
     def get_about(self, remote):

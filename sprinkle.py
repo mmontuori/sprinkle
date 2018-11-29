@@ -6,7 +6,7 @@ __author__ = "Michael Montuori [michael.montuori@gmail.com]"
 __copyright__ = "Copyright 2017 Michael Montuori. All rights reserved."
 __credits__ = ["Warren Crigger"]
 __license__ = "GPLv3"
-__version__ = "0.2"
+__version__ = "0.3"
 __revision__ = "0"
 __docformat__ = "reStructuredText"
 

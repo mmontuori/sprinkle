@@ -49,7 +49,7 @@ def execute(command_with_args, no_error=False):
                 stderr=subprocess.PIPE) as proc:
             (out, err) = proc.communicate()
 
-            logging.debug(out)
+            logging.debug(out[0:128])
             if err and no_error is False:
                 logging.warning(err.decode("utf-8").replace("\\n", "\n"))
 
@@ -98,7 +98,6 @@ def convert_unit(amount, unit):
 def sort_dict_keys(dictionary, reverse=False):
     tmp_keys = []
     for key in dictionary:
-        logging.debug('appending for sort: ' + key)
         tmp_keys.append(key)
     tmp_keys.sort(reverse=reverse)
     return tmp_keys
