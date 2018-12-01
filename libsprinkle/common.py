@@ -6,8 +6,8 @@ __author__ = "Michael Montuori [michael.montuori@gmail.com]"
 __copyright__ = "Copyright 2017 Michael Montuori. All rights reserved."
 __credits__ = ["Warren Crigger"]
 __license__ = "GPLv3"
-__version__ = "0.1"
-__revision__ = "2"
+__version__ = "1.0"
+__revision__ = "0"
 
 import subprocess
 import os.path

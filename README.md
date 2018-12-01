@@ -24,11 +24,6 @@ cd sprinkle
 ./sprinkle.py -c sprinkle.conf ls /
 ```
 
-Via Snap:
-```
-sudo snap install sprinkle
-```
-
 ## Prerequisites
 
 * Python 3 installed
