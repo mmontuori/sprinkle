@@ -3,8 +3,7 @@
 This document contains a basic starting guide to use Sprinkle. It will guide you in setting up a Sprinkle
 backup and how to recover the data should you need it.
 
-## Install Sprinkle
-
+## Install
 Install sprinkle instructions.
 
 ### Install RClone
@@ -37,37 +36,42 @@ Give an example for Windows
 Give an example
 ```
 
-## Configure RClone
+## Configure
+### Configure RClone
 Configure rclone instructions.
 ```
 Give an example
 ```
 
-## Configure Sprinkle to execute RClone
+### Configure Sprinkle
 Instructions here.
 ```
 Give an example
 ```
 
-## Verify Sprinkle->RClone->Volumes Connections
+## Verify
+### Verify Sprinkle->RClone->Volumes Connections
 Instructions here.
 ```
 Give an example
 ```
 
-## Backup a Directory via Sprinkle
+## Backup
+### Backup a Directory via Sprinkle
 Instructions here.
 ```
 Give an example
 ```
 
-## Restore a Previously Backed up Directory via Sprinkle
+## Restore
+### Restore a Previously Backed up Directory via Sprinkle
 Instructions here.
 ```
 Give an example
 ```
 
-## List Directory Content via Sprinkle
+## List
+### List Directory Content via Sprinkle
 Instructions here.
 ```
 Give an example
@@ -80,14 +84,13 @@ Please read [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c6
 We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/your/project/tags). 
 
 ## Authors
+* **Michael Montuori** - *Initial work* - [mmontuori](https://github.com/mmontuori)
 
-* **Billie Thompson** - *Initial work* - [PurpleBooth](https://github.com/PurpleBooth)
-
-See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
+See also the list of [contributors](https://github.com/mmontuori/sprinkle/contributors) who participated in this project.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+This project is licensed under the LGPL License - see the [LICENSE.md](https://github.com/mmontuori/sprinkle/LICENSE) file for details
 
 ## Acknowledgments
 
