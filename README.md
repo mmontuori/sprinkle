@@ -23,7 +23,7 @@ git clone https://gitlab.com/mmontuori/sprinkle.git
 cd sprinkle
 ./sprinkle.py -c sprinkle.conf ls /
 ```
-A more comprehensive guide can be found [here](https://github.com/mmontuori/sprinkle/blob/master/docs/guide.md)
+A more comprehensive guide can be found [here](https://mmontuori.github.io/sprinkle/docs/guide)
 
 ## Prerequisites
 
