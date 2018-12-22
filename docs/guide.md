@@ -286,9 +286,3 @@ See also the list of [contributors](https://github.com/mmontuori/sprinkle/contri
 
 This project is licensed under the LGPL License - see the [LICENSE.md](https://github.com/mmontuori/sprinkle/LICENSE) file for details
 
-## Acknowledgments
-
-* Hat tip to anyone whose code was used
-* Inspiration
-* etc
-
