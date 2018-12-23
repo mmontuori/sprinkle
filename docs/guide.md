@@ -33,7 +33,7 @@ Now that RClone is installed, let's proceed...
 
 ### Install Python 3
 Sprinkle is developed in Python 3. This chapter describes how to setup Python for Windows and Linux. The
-best way to install Python is by folloewing the official documentation [here](https://www.python.org/doc/).
+best way to install Python is by following the official documentation [here](https://www.python.org/doc/).
 After the installation is completed, the following two commands will return the respective version.  
 Make sure the installed version is at least 3.6 or later.
 ##### for Windows:
@@ -51,7 +51,7 @@ On Linux the actual command might be called **python3** due to compatibility and
 version 2.
 
 ### Install Sprinkle and Dependencies
-Now, we can install Sprinke and the necessary dependencies by following the officiel guide
+Now, we can install Sprinkle and the necessary dependencies by following the officiel guide
 [here](https://mmontuori.github.io/sprinkle/).  
 After the installation is complete, executing the following two commands will report Sprinkle's version
 for the respective operating system:
@@ -172,7 +172,7 @@ total:                           45G                   1G          3
 
 ## Backup
 ### Backup a Directory via Sprinkle
-To backup (sprinkle) a local direcotry over to clustered volumes, use:
+To backup (sprinkle) a local directory over to clustered volumes, use:
 ##### for Windows:
 ```
 C:\>rclone backup C:\dir_to_backup
@@ -272,7 +272,7 @@ EXAMPLES:
 ```
 
 ## Contributing
-Please read [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c63ec426) for details on our code of conduct, and the process for submitting pull requests to us.
+Please read [CONTRIBUTING.md](https://mmontuori.github.io/sprinkle/CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests to us.
 
 ## Versioning
 We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/your/project/tags). 
@@ -280,9 +280,6 @@ We use [SemVer](http://semver.org/) for versioning. For the versions available, 
 ## Authors
 * **Michael Montuori** - *Initial work* - [mmontuori](https://github.com/mmontuori)
 
-See also the list of [contributors](https://github.com/mmontuori/sprinkle/contributors) who participated in this project.
-
 ## License
-
-This project is licensed under the LGPL License - see the [LICENSE.md](https://github.com/mmontuori/sprinkle/LICENSE) file for details
+This project is licensed under the GPLv3 License - see the [LICENSE.md](https://github.com/mmontuori/sprinkle/LICENSE) file for details
 
