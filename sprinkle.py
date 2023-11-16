@@ -990,7 +990,7 @@ def main(argv):
         elif __args[0] == 'lsmd5':
             lsmd5()
         elif __args[0] == 'backup':
-            if __daemon_mode is not None:
+            if __daemon_mode is True:
                 try:
                     sd = sprinkle_daemon.SprinkleDaemon(__config, __args[1])
                     sd.start()
