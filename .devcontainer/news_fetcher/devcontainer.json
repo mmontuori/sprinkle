@@ -1,0 +1,6 @@
+{
+    "build": {
+        "name": "SprinkleDev"
+        "dockerfile": "Dockerfile"
+    }
+}
