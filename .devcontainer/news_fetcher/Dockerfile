@@ -1,10 +1,7 @@
-FROM python:3.9.1-alpine3.12
+FROM mmontuori/pythonenv:latest
 
-RUN apk update && apk upgrade
-RUN apk add --update --no-cache g++ gcc libxslt-dev logrotate tzdata
-RUN cp /usr/share/zoneinfo/America/New_York /etc/localtime
-RUN echo "America/New_York" >  /etc/timezone
-RUN apk del tzdata
+RUN apt update
+RUN apt install -y  g++ gcc libxslt1-dev logrotate
 
 RUN pip3 install progress
 RUN pip3 install daemons
